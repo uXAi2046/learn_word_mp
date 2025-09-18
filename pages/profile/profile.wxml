@@ -1,0 +1,8 @@
+<!--pages/profile/profile.wxml-->
+<view class="profile-container">
+  <view class="placeholder-content">
+    <text class="placeholder-icon">👤</text>
+    <text class="placeholder-text">个人中心</text>
+    <text class="placeholder-desc">敬请期待...</text>
+  </view>
+</view>

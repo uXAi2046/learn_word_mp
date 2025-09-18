@@ -1,0 +1,118 @@
+<!--pages/home/home.wxml-->
+<view class="home-container">
+  <!-- 顶部导航 -->
+  <view class="top-nav">
+    <view class="nav-left">
+      <image class="user-avatar" src="{{userInfo.avatar || '/images/default-avatar.png'}}" mode="aspectFill" bindtap="onAvatarTap"></image>
+    </view>
+    <view class="nav-center">
+      <text class="app-name">英语单词背诵</text>
+    </view>
+    <view class="nav-right">
+      <text class="settings-icon" bindtap="onSettingsTap">⚙️</text>
+    </view>
+  </view>
+
+  <!-- 今日目标卡片 -->
+  <view class="goal-card card fade-in">
+    <view class="card-header">
+      <text class="card-title">🎯 今日目标</text>
+    </view>
+    <view class="goal-content">
+      <text class="goal-text">目标: 学习{{dailyGoal}}个新单词</text>
+      <view class="progress-container">
+        <view class="progress">
+          <view class="progress-bar" style="width: {{goalProgress}}%"></view>
+        </view>
+        <text class="progress-text">{{currentProgress}}/{{dailyGoal}}</text>
+      </view>
+      <button class="btn btn-primary" bindtap="onContinueStudy">
+        {{currentProgress >= dailyGoal ? '已完成目标' : '继续学习'}}
+      </button>
+    </view>
+  </view>
+
+  <!-- 学习概览卡片 -->
+  <view class="overview-card card fade-in">
+    <view class="card-header">
+      <text class="card-title">📊 学习概览</text>
+    </view>
+    <view class="overview-content">
+      <view class="stats-row">
+        <view class="stat-item">
+          <text class="stat-label">连续学习</text>
+          <text class="stat-value">{{continuousDays}}天</text>
+        </view>
+        <view class="stat-item">
+          <text class="stat-label">等级</text>
+          <text class="stat-value">⭐ Lv.{{userLevel}}</text>
+        </view>
+      </view>
+      <view class="stats-row">
+        <view class="stat-item">
+          <text class="stat-label">本周答题</text>
+          <text class="stat-value">{{weeklyQuestions}}题</text>
+        </view>
+        <view class="stat-item">
+          <text class="stat-label">正确率</text>
+          <text class="stat-value">{{correctRate}}%</text>
+        </view>
+      </view>
+      <button class="btn btn-secondary" bindtap="onViewDetails">查看详情</button>
+    </view>
+  </view>
+
+  <!-- 快速开始卡片 -->
+  <view class="quick-start-card card fade-in">
+    <view class="card-header">
+      <text class="card-title">🚀 快速开始</text>
+    </view>
+    <view class="quick-actions">
+      <view class="action-grid">
+        <view class="action-item" bindtap="onQuizTap">
+          <view class="action-icon">📝</view>
+          <text class="action-text">答题模式</text>
+        </view>
+        <view class="action-item" bindtap="onWordbankTap">
+          <view class="action-icon">📖</view>
+          <text class="action-text">单词库</text>
+        </view>
+      </view>
+      <view class="action-grid">
+        <view class="action-item" bindtap="onKnowledgeTap">
+          <view class="action-icon">💡</view>
+          <text class="action-text">知识点</text>
+        </view>
+        <view class="action-item" bindtap="onProfileTap">
+          <view class="action-icon">👤</view>
+          <text class="action-text">个人中心</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 最近成就卡片 -->
+  <view class="achievements-card card fade-in">
+    <view class="card-header">
+      <text class="card-title">🏆 最近成就</text>
+    </view>
+    <view class="achievements-content">
+      <view class="achievement-list">
+        <view class="achievement-item" wx:for="{{recentAchievements}}" wx:key="id">
+          <text class="achievement-icon">{{item.icon}}</text>
+          <text class="achievement-text">{{item.title}}</text>
+        </view>
+      </view>
+      <button class="btn btn-secondary" bindtap="onViewAllAchievements">查看全部</button>
+    </view>
+  </view>
+
+  <!-- 教材选择提示 -->
+  <view class="textbook-hint card fade-in" wx:if="{{!selectedTextbook}}">
+    <view class="hint-content">
+      <text class="hint-icon">📚</text>
+      <text class="hint-text">请先选择您的教材版本</text>
+      <button class="btn btn-primary" bindtap="onSelectTextbook">选择教材</button>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,8 @@
+<!--pages/quiz/quiz.wxml-->
+<view class="quiz-container">
+  <view class="placeholder-content">
+    <text class="placeholder-icon">📝</text>
+    <text class="placeholder-text">答题模式</text>
+    <text class="placeholder-desc">敬请期待...</text>
+  </view>
+</view>

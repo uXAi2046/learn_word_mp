@@ -1,0 +1,31 @@
+<!--pages/splash/splash.wxml-->
+<view class="splash-container">
+  <!-- 应用图标 -->
+  <view class="app-icon">
+    <text class="icon-text">📚</text>
+  </view>
+  
+  <!-- 应用名称 -->
+  <view class="app-title">
+    <text class="title-text">英语单词背诵</text>
+  </view>
+  
+  <!-- 副标题 -->
+  <view class="app-subtitle">
+    <text class="subtitle-text">专为中学生设计</text>
+  </view>
+  
+  <!-- 加载指示器 -->
+  <view class="loading-indicator">
+    <view class="dot {{loadingIndex >= 0 ? 'active' : ''}}"></view>
+    <view class="dot {{loadingIndex >= 1 ? 'active' : ''}}"></view>
+    <view class="dot {{loadingIndex >= 2 ? 'active' : ''}}"></view>
+    <view class="dot {{loadingIndex >= 3 ? 'active' : ''}}"></view>
+    <view class="dot {{loadingIndex >= 4 ? 'active' : ''}}"></view>
+  </view>
+  
+  <!-- 版本信息 -->
+  <view class="version-info">
+    <text class="version-text">v1.0.0</text>
+  </view>
+</view>

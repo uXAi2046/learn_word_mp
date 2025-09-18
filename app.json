@@ -1,0 +1,58 @@
+{
+  "pages": [
+    "pages/splash/splash",
+    "pages/home/home",
+    "pages/quiz/quiz",
+    "pages/wordbank/wordbank",
+    "pages/knowledge/knowledge",
+    "pages/profile/profile"
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#FFFFFF",
+    "navigationBarTitleText": "英语单词背诵",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#F5F5F5"
+  },
+  "tabBar": {
+    "color": "#8C8C8C",
+    "selectedColor": "#4A90E2",
+    "backgroundColor": "#FFFFFF",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/home/home",
+        "text": "首页",
+        "iconPath": "images/home.png",
+        "selectedIconPath": "images/home-active.png"
+      },
+      {
+        "pagePath": "pages/quiz/quiz",
+        "text": "答题",
+        "iconPath": "images/quiz.png",
+        "selectedIconPath": "images/quiz-active.png"
+      },
+      {
+        "pagePath": "pages/wordbank/wordbank",
+        "text": "单词库",
+        "iconPath": "images/book.png",
+        "selectedIconPath": "images/book-active.png"
+      },
+      {
+        "pagePath": "pages/knowledge/knowledge",
+        "text": "知识点",
+        "iconPath": "images/lightbulb.png",
+        "selectedIconPath": "images/lightbulb-active.png"
+      },
+      {
+        "pagePath": "pages/profile/profile",
+        "text": "个人",
+        "iconPath": "images/user.png",
+        "selectedIconPath": "images/user-active.png"
+      }
+    ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"
+}

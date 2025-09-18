@@ -1,0 +1,8 @@
+<!--pages/wordbank/wordbank.wxml-->
+<view class="wordbank-container">
+  <view class="placeholder-content">
+    <text class="placeholder-icon">📖</text>
+    <text class="placeholder-text">单词库</text>
+    <text class="placeholder-desc">敬请期待...</text>
+  </view>
+</view>

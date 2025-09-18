@@ -1,0 +1,33 @@
+/* pages/quiz/quiz.wxss */
+.quiz-container {
+  padding: 40px 20px;
+  text-align: center;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.placeholder-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.placeholder-icon {
+  font-size: 80px;
+  margin-bottom: 20px;
+  opacity: 0.6;
+}
+
+.placeholder-text {
+  font-size: 24px;
+  font-weight: 600;
+  color: #2D3748;
+  margin-bottom: 8px;
+}
+
+.placeholder-desc {
+  font-size: 16px;
+  color: #718096;
+}
