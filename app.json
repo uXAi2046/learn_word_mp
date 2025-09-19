@@ -2,6 +2,7 @@
   "pages": [
     "pages/splash/splash",
     "pages/home/home",
+    "pages/study-detail/study-detail",
     "pages/quiz/quiz",
     "pages/wordbank/wordbank",
     "pages/knowledge/knowledge",

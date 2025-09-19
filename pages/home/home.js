@@ -139,8 +139,8 @@ Page({
       return
     }
     
-    wx.switchTab({
-      url: '/pages/quiz/quiz'
+    wx.navigateTo({
+      url: '/pages/study-detail/study-detail'
     })
   },
 

@@ -1,0 +1,153 @@
+<!--学习详情页面-->
+<view class="container">
+  <!-- 学习进度卡片 -->
+  <view class="progress-card card fade-in">
+    <view class="card-header">
+      <text class="card-title">🎯 今日学习进度</text>
+      <text class="progress-percentage">{{progressPercentage}}%</text>
+    </view>
+    <view class="progress-content">
+      <view class="progress-bar-container">
+        <view class="progress-bar">
+          <view class="progress-fill" style="width: {{progressPercentage}}%"></view>
+        </view>
+      </view>
+      <view class="progress-stats">
+        <text class="progress-text">已学习 {{learnedCount}}/{{totalCount}} 个单词</text>
+        <text class="time-text">用时: {{studyTime}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 当前单词卡片 -->
+  <view class="word-card card fade-in" wx:if="{{currentWord}}">
+    <view class="word-header">
+      <view class="word-main">
+        <text class="word-text">{{currentWord.word}}</text>
+        <view class="word-actions">
+          <button class="icon-btn" bindtap="onPlayAudio">
+            <text class="icon">🔊</text>
+          </button>
+          <button class="icon-btn" bindtap="onToggleFavorite" aria-label="收藏">
+            <text class="icon favorite-icon" style="color: {{currentWord.isFavorite ? '#E11D48' : '#1F2937'}}">{{currentWord.isFavorite ? '❤️' : '♡'}}</text>
+          </button>
+        </view>
+      </view>
+      <text class="phonetic-text">{{currentWord.phonetic}}</text>
+    </view>
+    
+    <view class="word-content">
+      <view class="word-meaning">
+        <text class="part-of-speech">{{currentWord.partOfSpeech}}</text>
+        <text class="meaning-text">{{currentWord.meaning}}</text>
+      </view>
+      
+      <view class="word-example" wx:if="{{currentWord.example}}">
+        <text class="example-label">例句:</text>
+        <text class="example-text">{{currentWord.example.english}}</text>
+        <text class="example-translation">{{currentWord.example.chinese}}</text>
+      </view>
+      
+      <view class="mastery-level">
+        <text class="mastery-label">熟练度:</text>
+        <view class="mastery-bar">
+          <view class="mastery-fill" style="width: {{currentWord.masteryLevel}}%"></view>
+        </view>
+        <text class="mastery-text">{{currentWord.masteryLevel}}%</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 学习模式选择 -->
+  <view class="mode-card card fade-in">
+    <view class="card-header">
+      <text class="card-title">📚 学习模式</text>
+    </view>
+    <view class="mode-content">
+      <view class="mode-grid">
+        <view class="mode-item {{selectedMode === 'recognition' ? 'active' : ''}}" 
+                bindtap="onSelectMode" data-mode="recognition">
+          <text class="mode-icon">👁️</text>
+          <text class="mode-name">认识模式</text>
+          <text class="mode-desc">看英文选中文</text>
+        </view>
+        
+        <view class="mode-item {{selectedMode === 'spelling' ? 'active' : ''}}" 
+                bindtap="onSelectMode" data-mode="spelling">
+          <text class="mode-icon">✏️</text>
+          <text class="mode-name">拼写模式</text>
+          <text class="mode-desc">听音频写单词</text>
+        </view>
+        
+        <view class="mode-item {{selectedMode === 'translation' ? 'active' : ''}}" 
+                bindtap="onSelectMode" data-mode="translation">
+          <text class="mode-icon">🔄</text>
+          <text class="mode-name">翻译模式</text>
+          <text class="mode-desc">看中文选英文</text>
+        </view>
+        
+        <view class="mode-item {{selectedMode === 'review' ? 'active' : ''}}" 
+                bindtap="onSelectMode" data-mode="review">
+          <text class="mode-icon">📖</text>
+          <text class="mode-name">复习模式</text>
+          <text class="mode-desc">复习已学单词</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 学习统计 -->
+  <view class="stats-card card fade-in">
+    <view class="card-header">
+      <text class="card-title">📊 学习统计</text>
+    </view>
+    <view class="stats-content">
+      <view class="stats-grid">
+        <view class="stat-item">
+          <text class="stat-value">{{todayStats.newWords}}</text>
+          <text class="stat-label">今日新词</text>
+        </view>
+        <view class="stat-item">
+          <text class="stat-value">{{todayStats.reviewWords}}</text>
+          <text class="stat-label">复习单词</text>
+        </view>
+        <view class="stat-item">
+          <text class="stat-value">{{todayStats.correctRate}}%</text>
+          <text class="stat-label">正确率</text>
+        </view>
+        <view class="stat-item">
+          <text class="stat-value">{{todayStats.studyTime}}</text>
+          <text class="stat-label">学习时长</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="action-buttons">
+    <view class="btn btn-secondary" role="button" aria-label="暂停学习" bindtap="onPauseStudy">
+      暂停学习
+    </view>
+    <view class="btn btn-primary {{!selectedMode ? 'disabled' : ''}}" role="button" aria-label="{{currentWord ? '下一个单词' : '开始学习'}}" bindtap="{{!selectedMode ? '' : 'onContinueNext'}}">
+      {{currentWord ? '下一个单词' : '开始学习'}}
+    </view>
+  </view>
+
+  <!-- 学习提示 -->
+  <view class="tip-card card fade-in" wx:if="{{showTip}}">
+    <view class="tip-content">
+      <text class="tip-icon">💡</text>
+      <text class="tip-text">{{tipText}}</text>
+      <view class="tip-close" bindtap="onCloseTip">
+        <text class="icon">✕</text>
+      </view>
+    </view>
+  </view>
+</view>
+
+<!-- 加载状态 -->
+<view class="loading-overlay" wx:if="{{isLoading}}">
+  <view class="loading-content">
+    <text class="loading-icon">📚</text>
+    <text class="loading-text">正在加载单词...</text>
+  </view>
+</view>

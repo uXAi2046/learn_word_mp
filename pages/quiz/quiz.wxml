@@ -1,8 +1,209 @@
 <!--pages/quiz/quiz.wxml-->
 <view class="quiz-container">
-  <view class="placeholder-content">
-    <text class="placeholder-icon">📝</text>
-    <text class="placeholder-text">答题模式</text>
-    <text class="placeholder-desc">敬请期待...</text>
+  <!-- 答题模式选择界面 -->
+  <view class="quiz-mode-selection" wx:if="{{currentPage === 'mode-selection'}}">
+    <!-- 页面标题 -->
+    <view class="page-header">
+      <text class="page-title">📝 开始答题</text>
+    </view>
+
+    <!-- 快速答题模式 -->
+    <view class="mode-card" bindtap="startQuickQuiz">
+      <view class="mode-header">
+        <view class="mode-icon">🚀</view>
+        <view class="mode-title">快速答题</view>
+      </view>
+      <view class="mode-features">
+        <text class="feature-item">• 固定30题测试</text>
+        <text class="feature-item">• 评估当前水平</text>
+        <text class="feature-item">• 预计用时: 8-12分钟</text>
+      </view>
+      <view class="mode-button">立即开始</view>
+    </view>
+
+    <!-- 无尽模式 -->
+    <view class="mode-card" bindtap="startEndlessMode">
+      <view class="mode-header">
+        <view class="mode-icon">♾️</view>
+        <view class="mode-title">无尽模式</view>
+      </view>
+      <view class="mode-features">
+        <text class="feature-item">• 无限题目练习</text>
+        <text class="feature-item">• 自由控制节奏</text>
+        <text class="feature-item">• 随时结束查看成绩</text>
+      </view>
+      <view class="mode-button">开始练习</view>
+    </view>
+
+    <!-- 高级设置 -->
+    <view class="settings-card">
+      <view class="settings-header">
+        <view class="settings-icon">⚙️</view>
+        <view class="settings-title">高级设置</view>
+      </view>
+      <view class="settings-content">
+        <view class="setting-item">
+          <text class="setting-label">题型偏好:</text>
+          <picker bindchange="onQuestionTypeChange" value="{{questionTypeIndex}}" range="{{questionTypes}}">
+            <view class="picker">{{questionTypes[questionTypeIndex]}} ▼</view>
+          </picker>
+        </view>
+        <view class="setting-item">
+          <text class="setting-label">难度等级:</text>
+          <picker bindchange="onDifficultyChange" value="{{difficultyIndex}}" range="{{difficulties}}">
+            <view class="picker">{{difficulties[difficultyIndex]}} ▼</view>
+          </picker>
+        </view>
+        <view class="setting-item">
+          <text class="setting-label">词汇范围:</text>
+          <picker bindchange="onVocabRangeChange" value="{{vocabRangeIndex}}" range="{{vocabRanges}}">
+            <view class="picker">{{vocabRanges[vocabRangeIndex]}} ▼</view>
+          </picker>
+        </view>
+        <view class="setting-item">
+          <text class="setting-label">答题时间:</text>
+          <picker bindchange="onTimeLimitChange" value="{{timeLimitIndex}}" range="{{timeLimits}}">
+            <view class="picker">{{timeLimits[timeLimitIndex]}} ▼</view>
+          </picker>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 答题进行中界面 -->
+  <view class="quiz-progress" wx:if="{{currentPage === 'quiz-progress'}}">
+    <!-- 进度信息 -->
+    <view class="progress-header" style="--progress-percent: {{progressPercent || 0}}%">
+      <text class="progress-info">第{{quizProgress.currentQuestion}}/{{quizProgress.totalQuestions}}题</text>
+    </view>
+    
+    <!-- 题目卡片 -->
+    <view class="question-card">
+      <!-- 选择题 -->
+      <view class="question-content" wx:if="{{currentQuestionData.type === 'choice'}}">
+        <view class="question-type">🔤 选择题</view>
+        <view class="question-word">{{currentQuestionData.word}}</view>
+        <view class="question-phonetic" wx:if="{{currentQuestionData.phonetic}}">{{currentQuestionData.phonetic}}</view>
+        <view class="play-pronunciation" bindtap="playPronunciation">🔊 播放发音</view>
+        <view class="question-prompt">请选择正确的中文释义:</view>
+      </view>
+
+      <!-- 填空题 -->
+      <view class="question-content" wx:if="{{currentQuestionData.type === 'fill'}}">
+        <view class="question-type">✏️ 填空题</view>
+        <view class="question-meaning">{{currentQuestionData.meaning}}</view>
+        <view class="question-prompt">请输入对应的英文单词:</view>
+        <input class="answer-input" placeholder="请输入答案" value="{{userAnswer}}" bindinput="onAnswerInput" />
+        <view class="question-hint" wx:if="{{currentQuestionData.hint}}">💡 提示: {{currentQuestionData.hint}}</view>
+      </view>
+    </view>
+
+    <!-- 选择题选项 -->
+    <view class="options-container" wx:if="{{currentQuestionData.type === 'choice'}}">
+      <view class="option-item {{selectedOption === item.id ? 'selected' : ''}}" 
+            wx:for="{{currentQuestionData.options}}" 
+            wx:key="id"
+            bindtap="selectOption"
+            data-option="{{item.id}}">
+        <text class="option-label">{{item.id}}</text>
+        <text class="option-text">{{item.text}}</text>
+      </view>
+    </view>
+
+    <!-- 操作按钮 -->
+    <view class="action-buttons">
+      <view class="btn btn-primary" bindtap="submitAnswer">
+        {{showFeedback ? '下一题' : '提交答案'}}
+      </view>
+      <view class="btn btn-secondary" bindtap="skipQuestion" wx:if="{{currentQuestionData.type === 'fill' && !showFeedback}}">
+        跳过此题
+      </view>
+      <view class="btn btn-secondary" bindtap="getHint" wx:if="{{currentQuestionData.type === 'fill' && !showFeedback}}">
+        需要提示
+      </view>
+    </view>
+
+    <!-- 答案反馈 -->
+    <view class="answer-feedback" wx:if="{{showFeedback}}">
+      <view class="feedback-header {{isCorrect ? 'correct' : 'incorrect'}}">
+        <text class="feedback-icon">{{isCorrect ? '✅' : '❌'}}</text>
+        <text class="feedback-text">{{isCorrect ? '回答正确!' : '回答错误'}}</text>
+      </view>
+      
+      <view class="word-detail">
+        <view class="word-info">
+          <text class="word-name">{{currentQuestionData.word}}</text>
+          <text class="word-phonetic" wx:if="{{currentQuestionData.phonetic}}">{{currentQuestionData.phonetic}}</text>
+          <text class="word-meaning">{{currentQuestionData.meaning}}</text>
+        </view>
+
+        <view class="example-sentence" wx:if="{{currentQuestionData.exampleSentence}}">
+          <text class="example-label">📝 例句:</text>
+          <text class="example-en">{{currentQuestionData.exampleSentence.en}}</text>
+          <text class="example-zh">{{currentQuestionData.exampleSentence.zh}}</text>
+        </view>
+
+        <view class="wrong-answer" wx:if="{{!isCorrect}}">
+          <text class="wrong-label">你的答案: {{selectedOption || userAnswer}}</text>
+          <text class="correct-label">正确答案: {{currentQuestionData.correctAnswer}}</text>
+        </view>
+
+        <view class="explanation" wx:if="{{currentQuestionData.explanation}}">
+          <text class="explanation-label">💡 解释:</text>
+          <text class="explanation-content">{{currentQuestionData.explanation}}</text>
+        </view>
+
+        <view class="error-collection" wx:if="{{!isCorrect}}">
+          <text class="collection-text">📚 已加入错题本</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 答题结果页面 -->
+  <view class="quiz-result" wx:if="{{currentPage === 'quiz-result'}}">
+    <view class="result-header">
+      <text class="result-title">🎉 答题完成</text>
+    </view>
+
+    <!-- 成绩卡片 -->
+    <view class="score-card">
+      <view class="score-title">🏆 本次成绩</view>
+      <view class="score-stats">
+        <text class="accuracy-stat">正确率: {{Math.round(correctCount/totalQuestions*100)}}%</text>
+        <text class="time-stat">用时: {{formatTime(totalTime)}}</text>
+        <text class="correct-stat">答对: {{correctCount}}/{{totalQuestions}}题</text>
+      </view>
+      <view class="star-rating">
+        <text class="stars" wx:for="{{starRating}}" wx:key="index">{{item ? '⭐' : '☆'}}</text>
+        <text class="rating-text">({{starCount}}星)</text>
+      </view>
+    </view>
+
+    <!-- 详细分析 -->
+    <view class="analysis-card">
+      <view class="analysis-title">📊 详细分析</view>
+      <view class="analysis-content">
+        <view class="pos-analysis">
+          <text class="analysis-label">词性分布:</text>
+          <view class="pos-stats">
+            <text class="pos-item" wx:for="{{posStats}}" wx:key="type">
+              {{item.name}}: {{item.correct}}/{{item.total}} {{item.correct === item.total ? '✓' : ''}}
+            </text>
+          </view>
+        </view>
+        <view class="error-summary" wx:if="{{quizResult.analysis.errorCount > 0}}">
+          <text class="error-label">错题: {{quizResult.analysis.errorCount}}个</text>
+          <text class="error-link" bindtap="viewErrors">查看详情 →</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 操作按钮 -->
+    <view class="result-actions">
+      <view class="btn btn-primary" bindtap="restartQuiz">再来一次</view>
+      <view class="btn btn-secondary" bindtap="viewErrors" wx:if="{{quizResult.analysis.errorCount > 0}}">查看错题</view>
+      <view class="btn btn-secondary" bindtap="backToHome">返回首页</view>
+    </view>
   </view>
 </view>
