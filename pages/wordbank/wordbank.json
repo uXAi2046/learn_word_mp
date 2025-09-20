@@ -1,3 +1,8 @@
 {
-  "navigationBarTitleText": "单词库"
+  "navigationBarTitleText": "单词库",
+  "navigationBarBackgroundColor": "#FFFFFF",
+  "navigationBarTextStyle": "black",
+  "backgroundColor": "#F5F5F5",
+  "enablePullDownRefresh": true,
+  "onReachBottomDistance": 50
 }

@@ -145,15 +145,16 @@ Page({
   },
 
   // 查看详情按钮点击事件
+  // 查看详情点击事件
   onViewDetails() {
     wx.navigateTo({
-      url: '/pages/study-report/study-report'
+      url: '/pages/study-stats/study-stats'
     })
   },
 
   // 答题模式点击事件
   onQuizTap() {
-    wx.switchTab({
+    wx.navigateTo({
       url: '/pages/quiz/quiz'
     })
   },

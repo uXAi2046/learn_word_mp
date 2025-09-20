@@ -4,5 +4,6 @@
   "navigationBarTextStyle": "black",
   "backgroundColor": "#F5F5F5",
   "enablePullDownRefresh": true,
-  "onReachBottomDistance": 50
+  "onReachBottomDistance": 50,
+  "navigationStyle": "default"
 }

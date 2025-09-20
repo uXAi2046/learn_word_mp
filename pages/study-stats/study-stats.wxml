@@ -1,0 +1,143 @@
+<!--pages/study-stats/study-stats.wxml-->
+<view class="container">
+  <!-- 顶部统计卡片 -->
+  <view class="stats-overview">
+    <view class="stats-card">
+      <view class="stats-title">📊 学习统计概览</view>
+      <view class="stats-grid">
+        <view class="stat-item">
+          <view class="stat-number">{{totalDays}}</view>
+          <view class="stat-label">连续学习天数</view>
+        </view>
+        <view class="stat-item">
+          <view class="stat-number">{{currentLevel}}</view>
+          <view class="stat-label">当前等级</view>
+        </view>
+        <view class="stat-item">
+          <view class="stat-number">{{totalWords}}</view>
+          <view class="stat-label">累计学习单词</view>
+        </view>
+        <view class="stat-item">
+          <view class="stat-number">{{accuracy}}%</view>
+          <view class="stat-label">平均正确率</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 本周学习进度 -->
+  <view class="week-progress">
+    <view class="section-title">📈 本周学习进度</view>
+    <view class="progress-card">
+      <view class="progress-header">
+        <view class="progress-text">本周目标: {{weekTarget}}个单词</view>
+        <view class="progress-percent">{{weekProgress}}%</view>
+      </view>
+      <view class="progress-bar">
+        <view class="progress-fill" style="width: {{weekProgress}}%"></view>
+      </view>
+      <view class="progress-detail">
+        <view class="detail-item">
+          <text class="detail-label">已完成:</text>
+          <text class="detail-value">{{weekCompleted}}个</text>
+        </view>
+        <view class="detail-item">
+          <text class="detail-label">剩余:</text>
+          <text class="detail-value">{{weekRemaining}}个</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 学习时长统计 -->
+  <view class="time-stats">
+    <view class="section-title">⏰ 学习时长统计</view>
+    <view class="time-card">
+      <view class="time-grid">
+        <view class="time-item">
+          <view class="time-number">{{todayTime}}</view>
+          <view class="time-label">今日学习</view>
+          <view class="time-unit">分钟</view>
+        </view>
+        <view class="time-item">
+          <view class="time-number">{{weekTime}}</view>
+          <view class="time-label">本周学习</view>
+          <view class="time-unit">小时</view>
+        </view>
+        <view class="time-item">
+          <view class="time-number">{{totalTime}}</view>
+          <view class="time-label">累计学习</view>
+          <view class="time-unit">小时</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 答题统计 -->
+  <view class="quiz-stats">
+    <view class="section-title">🎯 答题统计</view>
+    <view class="quiz-card">
+      <view class="quiz-overview">
+        <view class="quiz-item">
+          <view class="quiz-number">{{totalQuestions}}</view>
+          <view class="quiz-label">总答题数</view>
+        </view>
+        <view class="quiz-item">
+          <view class="quiz-number">{{correctAnswers}}</view>
+          <view class="quiz-label">正确答题</view>
+        </view>
+        <view class="quiz-item">
+          <view class="quiz-number">{{wrongAnswers}}</view>
+          <view class="quiz-label">错误答题</view>
+        </view>
+      </view>
+      <view class="accuracy-display">
+        <view class="accuracy-circle">
+          <view class="accuracy-text">{{accuracy}}%</view>
+          <view class="accuracy-label">总体正确率</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 最近学习记录 -->
+  <view class="recent-records">
+    <view class="section-title">📝 最近学习记录</view>
+    <view class="records-list">
+      <view class="record-item" wx:for="{{recentRecords}}" wx:key="id">
+        <view class="record-date">{{item.date}}</view>
+        <view class="record-content">
+          <view class="record-title">{{item.title}}</view>
+          <view class="record-detail">
+            <text class="record-words">学习{{item.wordsCount}}个单词</text>
+            <text class="record-time">用时{{item.duration}}分钟</text>
+            <text class="record-accuracy">正确率{{item.accuracy}}%</text>
+          </view>
+        </view>
+        <view class="record-score">+{{item.score}}</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 成就展示 -->
+  <view class="achievements">
+    <view class="section-title">🏆 最近成就</view>
+    <view class="achievement-list">
+      <view class="achievement-item" wx:for="{{achievements}}" wx:key="id">
+        <view class="achievement-icon">{{item.icon}}</view>
+        <view class="achievement-content">
+          <view class="achievement-name">{{item.name}}</view>
+          <view class="achievement-desc">{{item.description}}</view>
+          <view class="achievement-date">{{item.date}}</view>
+        </view>
+        <view class="achievement-badge" wx:if="{{item.isNew}}">NEW</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 操作按钮 -->
+  <view class="action-buttons">
+    <button class="btn btn-primary" bindtap="startLearning">开始学习</button>
+    <button class="btn btn-secondary" bindtap="viewErrorBook">查看错题本</button>
+  </view>
+</view>

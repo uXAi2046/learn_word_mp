@@ -1,0 +1,209 @@
+<!--pages/word-detail/word-detail.wxml-->
+<view class="word-detail-container">
+  <!-- 加载状态 -->
+  <view wx:if="{{loading}}" class="loading-container">
+    <text class="loading-text">加载中...</text>
+  </view>
+
+  <!-- 单词详情内容 -->
+  <view wx:else class="detail-content">
+    <!-- 单词主信息卡片 -->
+    <view class="word-main-card">
+      <view class="word-header">
+        <view class="word-title-section">
+          <text class="word-text">{{wordInfo.word}}</text>
+          <view class="pronunciation-section">
+            <text class="pronunciation">{{wordInfo.pronunciation}}</text>
+            <view 
+              class="play-btn {{isPlaying ? 'playing' : ''}}" 
+              bindtap="playPronunciation"
+            >
+              <text class="play-icon">{{isPlaying ? '⏸️' : '🔊'}}</text>
+            </view>
+          </view>
+        </view>
+        
+        <view class="word-actions">
+          <view 
+            class="favorite-btn {{wordInfo.isFavorite ? 'favorited' : ''}}"
+            bindtap="toggleFavorite"
+          >
+            <text class="favorite-icon">{{wordInfo.isFavorite ? '❤️' : '🤍'}}</text>
+          </view>
+        </view>
+      </view>
+
+      <view class="word-basic-info">
+        <view class="pos-translation">
+          <text class="part-of-speech">{{wordInfo.partOfSpeech}}</text>
+          <text class="main-translation">{{wordInfo.translation}}</text>
+        </view>
+        
+        <view class="word-meta">
+          <text class="source-info">{{wordInfo.textbook}} {{wordInfo.grade}} {{wordInfo.unit}}</text>
+          <text class="importance-tag importance-{{wordInfo.importance === '必考' ? 'required' : wordInfo.importance === '常考' ? 'common' : 'understand'}}">
+            {{wordInfo.importance}}
+          </text>
+        </view>
+      </view>
+
+      <!-- 掌握程度 -->
+      <view class="mastery-section">
+        <view class="mastery-header">
+          <text class="mastery-label">掌握程度</text>
+          <text class="mastery-value">{{masteryLevel}}%</text>
+        </view>
+        <view class="mastery-bar">
+          <view class="mastery-fill" style="width: {{masteryLevel}}%"></view>
+        </view>
+        <view class="mastery-actions">
+          <text 
+            class="mastery-btn" 
+            data-level="25"
+            bindtap="updateMasteryLevel"
+          >不认识</text>
+          <text 
+            class="mastery-btn" 
+            data-level="50"
+            bindtap="updateMasteryLevel"
+          >有印象</text>
+          <text 
+            class="mastery-btn" 
+            data-level="75"
+            bindtap="updateMasteryLevel"
+          >认识</text>
+          <text 
+            class="mastery-btn" 
+            data-level="100"
+            bindtap="updateMasteryLevel"
+          >很熟悉</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 详细释义 -->
+    <view class="definitions-card">
+      <view class="card-header">
+        <text class="card-title">📝 详细释义</text>
+      </view>
+      <view class="definitions-list">
+        <view 
+          wx:for="{{wordInfo.definitions}}" 
+          wx:key="index"
+          class="definition-item"
+        >
+          <text class="definition-number">{{index + 1}}.</text>
+          <text class="definition-text">{{item}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 例句学习 -->
+    <view class="example-card">
+      <view class="card-header">
+        <text class="card-title">📖 例句学习</text>
+      </view>
+      <view class="example-content">
+        <view class="example-sentence">
+          <text class="example-en">{{wordInfo.exampleSentence}}</text>
+          <view class="example-actions">
+            <text class="example-play" bindtap="playPronunciation">🔊</text>
+          </view>
+        </view>
+        <text class="example-cn">{{wordInfo.exampleTranslation}}</text>
+      </view>
+    </view>
+
+    <!-- 同义词反义词 -->
+    <view class="synonyms-card">
+      <view class="card-header">
+        <text class="card-title">🔗 同义词 & 反义词</text>
+      </view>
+      <view class="synonyms-content">
+        <view class="synonym-section">
+          <text class="synonym-label">同义词:</text>
+          <view class="synonym-list">
+            <text 
+              wx:for="{{wordInfo.synonyms}}" 
+              wx:key="index"
+              class="synonym-item"
+              data-word="{{item}}"
+              bindtap="viewRelatedWord"
+            >{{item}}</text>
+          </view>
+        </view>
+        
+        <view class="synonym-section">
+          <text class="synonym-label">反义词:</text>
+          <view class="synonym-list">
+            <text 
+              wx:for="{{wordInfo.antonyms}}" 
+              wx:key="index"
+              class="synonym-item antonym"
+              data-word="{{item}}"
+              bindtap="viewRelatedWord"
+            >{{item}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 记忆技巧 -->
+    <view class="memory-tips-card">
+      <view class="card-header">
+        <text class="card-title">🧠 记忆技巧</text>
+      </view>
+      <view class="memory-tips-list">
+        <view 
+          wx:for="{{memoryTips}}" 
+          wx:key="index"
+          class="memory-tip-item"
+        >
+          <view class="tip-header">
+            <text class="tip-type">{{item.type}}</text>
+          </view>
+          <text class="tip-content">{{item.content}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 词源信息 -->
+    <view class="etymology-card">
+      <view class="card-header">
+        <text class="card-title">📚 词源信息</text>
+      </view>
+      <text class="etymology-text">{{wordInfo.etymology}}</text>
+    </view>
+
+    <!-- 学习统计 -->
+    <view class="study-stats-card">
+      <view class="card-header">
+        <text class="card-title">📊 学习统计</text>
+      </view>
+      <view class="stats-grid">
+        <view class="stat-item">
+          <text class="stat-value">{{studyCount}}</text>
+          <text class="stat-label">学习次数</text>
+        </view>
+        <view class="stat-item">
+          <text class="stat-value">{{wordInfo.lastReviewTime}}</text>
+          <text class="stat-label">上次复习</text>
+        </view>
+        <view class="stat-item">
+          <text class="stat-value">{{masteryLevel}}%</text>
+          <text class="stat-label">掌握程度</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 操作按钮 -->
+    <view class="action-buttons">
+      <view class="action-btn primary" bindtap="startPractice">
+        <text class="btn-text">开始练习</text>
+      </view>
+      <view class="action-btn secondary" bindtap="shareWord">
+        <text class="btn-text">分享单词</text>
+      </view>
+    </view>
+  </view>
+</view>

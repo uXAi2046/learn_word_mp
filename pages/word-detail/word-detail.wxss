@@ -1,0 +1,448 @@
+/* pages/word-detail/word-detail.wxss */
+.word-detail-container {
+  padding: 20rpx;
+  background-color: #F5F5F5;
+  min-height: 100vh;
+}
+
+/* 加载状态 */
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 60vh;
+}
+
+.loading-text {
+  font-size: 32rpx;
+  color: #666;
+}
+
+/* 详情内容 */
+.detail-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+/* 单词主信息卡片 */
+.word-main-card {
+  background-color: white;
+  border-radius: 20rpx;
+  padding: 30rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+}
+
+.word-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 25rpx;
+}
+
+.word-title-section {
+  flex: 1;
+}
+
+.word-text {
+  font-size: 48rpx;
+  font-weight: bold;
+  color: #333;
+  display: block;
+  margin-bottom: 15rpx;
+}
+
+.pronunciation-section {
+  display: flex;
+  align-items: center;
+  gap: 15rpx;
+}
+
+.pronunciation {
+  font-size: 28rpx;
+  color: #666;
+  font-style: italic;
+}
+
+.play-btn {
+  padding: 10rpx;
+  border-radius: 50%;
+  background-color: #4A90E2;
+  transition: all 0.3s ease;
+}
+
+.play-btn.playing {
+  background-color: #FF6B6B;
+}
+
+.play-icon {
+  font-size: 28rpx;
+  color: white;
+}
+
+.word-actions {
+  display: flex;
+  align-items: center;
+}
+
+.favorite-btn {
+  padding: 15rpx;
+}
+
+.favorite-icon {
+  font-size: 36rpx;
+}
+
+.word-basic-info {
+  margin-bottom: 25rpx;
+}
+
+.pos-translation {
+  display: flex;
+  align-items: center;
+  gap: 15rpx;
+  margin-bottom: 15rpx;
+}
+
+.part-of-speech {
+  font-size: 24rpx;
+  color: #666;
+  background-color: #F8F9FA;
+  padding: 6rpx 12rpx;
+  border-radius: 12rpx;
+}
+
+.main-translation {
+  font-size: 32rpx;
+  color: #333;
+  font-weight: 500;
+}
+
+.word-meta {
+  display: flex;
+  align-items: center;
+  gap: 15rpx;
+}
+
+.source-info {
+  font-size: 24rpx;
+  color: #666;
+}
+
+.importance-tag {
+  font-size: 20rpx;
+  padding: 4rpx 10rpx;
+  border-radius: 10rpx;
+  color: white;
+}
+
+.importance-required {
+  background-color: #FF4757;
+}
+
+.importance-common {
+  background-color: #FFA502;
+}
+
+.importance-understand {
+  background-color: #57C4E5;
+}
+
+/* 掌握程度 */
+.mastery-section {
+  background-color: #F8F9FA;
+  border-radius: 15rpx;
+  padding: 25rpx;
+}
+
+.mastery-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15rpx;
+}
+
+.mastery-label {
+  font-size: 28rpx;
+  color: #333;
+  font-weight: 500;
+}
+
+.mastery-value {
+  font-size: 32rpx;
+  color: #4A90E2;
+  font-weight: bold;
+}
+
+.mastery-bar {
+  height: 12rpx;
+  background-color: #E9ECEF;
+  border-radius: 6rpx;
+  overflow: hidden;
+  margin-bottom: 20rpx;
+}
+
+.mastery-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #FF6B6B 0%, #4ECDC4 50%, #45B7D1 100%);
+  border-radius: 6rpx;
+  transition: width 0.3s ease;
+}
+
+.mastery-actions {
+  display: flex;
+  gap: 15rpx;
+}
+
+.mastery-btn {
+  flex: 1;
+  text-align: center;
+  padding: 15rpx 10rpx;
+  background-color: white;
+  border-radius: 25rpx;
+  font-size: 24rpx;
+  color: #666;
+  border: 2rpx solid #E9ECEF;
+  transition: all 0.3s ease;
+}
+
+.mastery-btn:active {
+  background-color: #4A90E2;
+  color: white;
+  border-color: #4A90E2;
+}
+
+/* 卡片通用样式 */
+.definitions-card,
+.example-card,
+.synonyms-card,
+.memory-tips-card,
+.etymology-card,
+.study-stats-card {
+  background-color: white;
+  border-radius: 20rpx;
+  padding: 30rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+  margin-bottom: 20rpx;
+}
+
+.card-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+/* 详细释义 */
+.definitions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15rpx;
+}
+
+.definition-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10rpx;
+}
+
+.definition-number {
+  font-size: 26rpx;
+  color: #4A90E2;
+  font-weight: bold;
+  min-width: 30rpx;
+}
+
+.definition-text {
+  font-size: 28rpx;
+  color: #333;
+  line-height: 1.5;
+}
+
+/* 例句学习 */
+.example-content {
+  display: flex;
+  flex-direction: column;
+  gap: 15rpx;
+}
+
+.example-sentence {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #F8F9FA;
+  padding: 20rpx;
+  border-radius: 15rpx;
+  border-left: 6rpx solid #4A90E2;
+}
+
+.example-en {
+  font-size: 28rpx;
+  color: #333;
+  font-style: italic;
+  line-height: 1.5;
+}
+
+.example-actions {
+  display: flex;
+  align-items: center;
+}
+
+.example-play {
+  font-size: 28rpx;
+  padding: 10rpx;
+  color: #4A90E2;
+}
+
+.example-cn {
+  font-size: 26rpx;
+  color: #666;
+  padding-left: 20rpx;
+}
+
+/* 同义词反义词 */
+.synonyms-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.synonym-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10rpx;
+}
+
+.synonym-label {
+  font-size: 26rpx;
+  color: #666;
+  font-weight: 500;
+}
+
+.synonym-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10rpx;
+}
+
+.synonym-item {
+  background-color: #E3F2FD;
+  color: #1976D2;
+  padding: 8rpx 15rpx;
+  border-radius: 20rpx;
+  font-size: 24rpx;
+  border: 2rpx solid #BBDEFB;
+}
+
+.synonym-item.antonym {
+  background-color: #FFEBEE;
+  color: #D32F2F;
+  border-color: #FFCDD2;
+}
+
+/* 记忆技巧 */
+.memory-tips-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.memory-tip-item {
+  background-color: #F8F9FA;
+  padding: 20rpx;
+  border-radius: 15rpx;
+  border-left: 6rpx solid #FFA502;
+}
+
+.tip-header {
+  margin-bottom: 10rpx;
+}
+
+.tip-type {
+  font-size: 24rpx;
+  color: #FFA502;
+  font-weight: bold;
+}
+
+.tip-content {
+  font-size: 26rpx;
+  color: #333;
+  line-height: 1.5;
+}
+
+/* 词源信息 */
+.etymology-text {
+  font-size: 28rpx;
+  color: #333;
+  line-height: 1.6;
+  background-color: #F8F9FA;
+  padding: 20rpx;
+  border-radius: 15rpx;
+  border-left: 6rpx solid #57C4E5;
+}
+
+/* 学习统计 */
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 20rpx;
+}
+
+.stat-item {
+  text-align: center;
+  background-color: #F8F9FA;
+  padding: 20rpx;
+  border-radius: 15rpx;
+}
+
+.stat-value {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #4A90E2;
+  display: block;
+  margin-bottom: 8rpx;
+}
+
+.stat-label {
+  font-size: 24rpx;
+  color: #666;
+}
+
+/* 操作按钮 */
+.action-buttons {
+  display: flex;
+  gap: 20rpx;
+  margin-top: 20rpx;
+}
+
+.action-btn {
+  flex: 1;
+  text-align: center;
+  padding: 25rpx;
+  border-radius: 30rpx;
+  font-size: 32rpx;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.action-btn.primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  box-shadow: 0 6rpx 20rpx rgba(102, 126, 234, 0.4);
+}
+
+.action-btn.secondary {
+  background-color: white;
+  color: #4A90E2;
+  border: 3rpx solid #4A90E2;
+}
+
+.action-btn:active {
+  transform: translateY(2rpx);
+}
+
+.btn-text {
+  font-weight: 500;
+}

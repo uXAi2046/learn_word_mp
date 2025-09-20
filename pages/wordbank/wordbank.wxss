@@ -1,11 +1,525 @@
 /* pages/wordbank/wordbank.wxss */
 .wordbank-container {
-  padding: 40px 20px;
-  text-align: center;
+  padding: 20rpx;
+  background-color: #F5F5F5;
   min-height: 100vh;
+}
+
+/* 头部区域 */
+.header-section {
+  margin-bottom: 20rpx;
+}
+
+/* 学习进度卡片 */
+.progress-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 20rpx;
+  padding: 30rpx;
+  margin-bottom: 20rpx;
+  color: white;
+}
+
+.progress-header {
   display: flex;
   align-items: center;
+  margin-bottom: 20rpx;
+}
+
+.progress-icon {
+  font-size: 32rpx;
+  margin-right: 15rpx;
+}
+
+.progress-title {
+  font-size: 32rpx;
+  font-weight: bold;
+}
+
+.progress-content {
+  display: flex;
+  flex-direction: column;
+  gap: 15rpx;
+}
+
+.progress-stats {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.progress-text {
+  font-size: 28rpx;
+  opacity: 0.9;
+}
+
+.progress-bar {
+  height: 12rpx;
+  background-color: rgba(255, 255, 255, 0.3);
+  border-radius: 6rpx;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background-color: #FFD700;
+  border-radius: 6rpx;
+  transition: width 0.3s ease;
+}
+
+.progress-percent {
+  font-size: 32rpx;
+  font-weight: bold;
+  text-align: center;
+}
+
+/* 搜索区域 */
+.search-section {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+  margin-bottom: 20rpx;
+}
+
+.search-bar {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  background-color: white;
+  border-radius: 50rpx;
+  padding: 20rpx 30rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+}
+
+.search-icon {
+  font-size: 32rpx;
+  margin-right: 15rpx;
+  color: #999;
+}
+
+.search-input {
+  flex: 1;
+  font-size: 28rpx;
+  color: #333;
+}
+
+.clear-search {
+  font-size: 32rpx;
+  color: #999;
+  padding: 10rpx;
+  margin-left: 10rpx;
+}
+
+.filter-btn {
+  display: flex;
+  align-items: center;
+  background-color: #4A90E2;
+  color: white;
+  padding: 20rpx 25rpx;
+  border-radius: 50rpx;
+  box-shadow: 0 4rpx 12rpx rgba(74, 144, 226, 0.3);
+}
+
+.filter-arrow {
+  font-size: 20rpx;
+  margin-left: 8rpx;
+}
+
+.filter-icon {
+  font-size: 28rpx;
+  margin-right: 8rpx;
+}
+
+.filter-text {
+  font-size: 26rpx;
+}
+
+/* 筛选器区域 */
+.filters-section {
+  background-color: white;
+  border-radius: 20rpx;
+  padding: 30rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+}
+
+.filter-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 25rpx;
+}
+
+.filter-row:last-child {
+  margin-bottom: 0;
+}
+
+.filter-label {
+  font-size: 28rpx;
+  color: #333;
+  font-weight: 500;
+}
+
+.filter-picker {
+  background-color: #F8F9FA;
+  padding: 15rpx 25rpx;
+  border-radius: 30rpx;
+  font-size: 26rpx;
+  color: #4A90E2;
+  border: 2rpx solid #E9ECEF;
+}
+
+/* 工具栏 */
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: white;
+  border-radius: 20rpx;
+  padding: 25rpx 30rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+}
+
+.display-mode {
+  display: flex;
+  gap: 10rpx;
+}
+
+.mode-btn {
+  padding: 12rpx 20rpx;
+  border-radius: 20rpx;
+  font-size: 24rpx;
+  color: #666;
+  background-color: #F8F9FA;
+  transition: all 0.3s ease;
+}
+
+.mode-btn.active {
+  background-color: #4A90E2;
+  color: white;
+}
+
+.sort-options {
+  display: flex;
+  align-items: center;
+  gap: 15rpx;
+}
+
+.sort-label {
+  font-size: 26rpx;
+  color: #666;
+}
+
+.sort-btn {
+  padding: 8rpx 15rpx;
+  border-radius: 15rpx;
+  font-size: 22rpx;
+  color: #666;
+  background-color: #F8F9FA;
+  transition: all 0.3s ease;
+}
+
+.sort-btn.active {
+  background-color: #4A90E2;
+  color: white;
+}
+
+/* 单词列表 */
+.word-list {
+  flex: 1;
+}
+
+/* 列表模式 */
+.list-mode {
+  display: flex;
+  flex-direction: column;
+  gap: 15rpx;
+}
+
+.word-item-list {
+  background-color: white;
+  border-radius: 20rpx;
+  padding: 30rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease;
+}
+
+.word-item-list:active {
+  transform: scale(0.98);
+}
+
+.word-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15rpx;
+}
+
+.word-text {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333;
+  margin-right: 15rpx;
+}
+
+.word-pronunciation {
+  font-size: 28rpx;
+  margin-right: auto;
+  color: #4A90E2;
+}
+
+.favorite-btn {
+  font-size: 32rpx;
+  padding: 10rpx;
+}
+
+.word-info {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15rpx;
+  gap: 15rpx;
+}
+
+.word-pos {
+  font-size: 24rpx;
+  color: #666;
+  background-color: #F8F9FA;
+  padding: 6rpx 12rpx;
+  border-radius: 12rpx;
+}
+
+.word-translation {
+  font-size: 28rpx;
+  color: #333;
+}
+
+.word-meta {
+  display: flex;
+  align-items: center;
+  gap: 15rpx;
+  flex-wrap: wrap;
+}
+
+.word-source {
+  font-size: 22rpx;
+  color: #666;
+}
+
+.importance-tag {
+  font-size: 20rpx;
+  padding: 4rpx 10rpx;
+  border-radius: 10rpx;
+  color: white;
+}
+
+.importance-required {
+  background-color: #FF4757;
+}
+
+.importance-common {
+  background-color: #FFA502;
+}
+
+.importance-understand {
+  background-color: #57C4E5;
+}
+
+.mastery-level {
+  font-size: 22rpx;
+  color: #666;
+}
+
+.last-review {
+  font-size: 22rpx;
+  color: #999;
+}
+
+/* 卡片模式 */
+.card-mode {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.word-item-card {
+  background-color: white;
+  border-radius: 20rpx;
+  padding: 30rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease;
+}
+
+.word-item-card:active {
+  transform: scale(0.98);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+
+.word-title {
+  display: flex;
+  align-items: center;
+  gap: 15rpx;
+}
+
+.card-content {
+  margin-bottom: 20rpx;
+}
+
+.word-meaning {
+  display: flex;
+  align-items: center;
+  gap: 15rpx;
+  margin-bottom: 15rpx;
+}
+
+.word-example {
+  background-color: #F8F9FA;
+  padding: 20rpx;
+  border-radius: 15rpx;
+  border-left: 6rpx solid #4A90E2;
+}
+
+.example-label {
+  font-size: 24rpx;
+  color: #666;
+  display: block;
+  margin-bottom: 10rpx;
+}
+
+.example-text {
+  font-size: 26rpx;
+  color: #333;
+  display: block;
+  margin-bottom: 8rpx;
+  font-style: italic;
+}
+
+.example-translation {
+  font-size: 24rpx;
+  color: #666;
+  display: block;
+}
+
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.word-tags {
+  display: flex;
+  gap: 10rpx;
+}
+
+.source-tag, .grade-tag {
+  font-size: 20rpx;
+  padding: 4rpx 10rpx;
+  border-radius: 10rpx;
+  background-color: #E9ECEF;
+  color: #666;
+}
+
+.mastery-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8rpx;
+}
+
+.mastery-text {
+  font-size: 22rpx;
+  color: #666;
+}
+
+.mastery-bar {
+  width: 120rpx;
+  height: 8rpx;
+  background-color: #E9ECEF;
+  border-radius: 4rpx;
+  overflow: hidden;
+}
+
+.mastery-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #FF6B6B 0%, #4ECDC4 50%, #45B7D1 100%);
+  border-radius: 4rpx;
+  transition: width 0.3s ease;
+}
+
+/* 空状态 */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   justify-content: center;
+  padding: 100rpx 40rpx;
+  text-align: center;
+}
+
+.empty-icon {
+  font-size: 120rpx;
+  margin-bottom: 30rpx;
+  opacity: 0.5;
+}
+
+.empty-text {
+  font-size: 32rpx;
+  color: #666;
+  margin-bottom: 15rpx;
+}
+
+.empty-desc {
+  font-size: 26rpx;
+  color: #999;
+}
+
+/* 加载状态 */
+.loading-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 60rpx;
+}
+
+.loading-text {
+  font-size: 28rpx;
+  color: #666;
+}
+
+/* 筛选器操作按钮 */
+.filter-actions {
+  display: flex;
+  gap: 20rpx;
+  margin-top: 30rpx;
+  padding-top: 20rpx;
+  border-top: 2rpx solid #F0F0F0;
+}
+
+.filter-action-btn {
+  flex: 1;
+  text-align: center;
+  padding: 20rpx;
+  border-radius: 30rpx;
+  font-size: 28rpx;
+}
+
+.reset-btn {
+  background-color: #F8F9FA;
+  color: #666;
+  border: 2rpx solid #E9ECEF;
+}
+
+.apply-btn {
+  background-color: #4A90E2;
+  color: white;
+}
+
+.action-text {
+  font-weight: 500;
 }
 
 .placeholder-content {

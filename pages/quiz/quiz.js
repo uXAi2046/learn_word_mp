@@ -349,7 +349,7 @@ Page({
   startEndlessMode() {
     this.setData({
       currentPage: 'quiz-progress',
-      'quizSettings.questionCount': 999,
+      isEndlessMode: true,
       'quizSettings.difficulty': 'mixed',
       'quizSettings.questionType': 'mixed'
     });
@@ -366,26 +366,51 @@ Page({
 
   // 开始答题
   startQuiz() {
-    // 从题库中随机选择题目
-    const shuffledQuestions = this.data.questionBank.sort(() => Math.random() - 0.5);
-    const selectedQuestions = shuffledQuestions.slice(0, this.data.quizSettings.questionCount);
-    
-    this.setData({
-      questions: selectedQuestions,
-      'quizProgress.currentQuestion': 1,
-      'quizProgress.totalQuestions': selectedQuestions.length,
-      'quizProgress.timeElapsed': 0,
-      'quizProgress.accuracy': 100,
-      'quizProgress.correctCount': 0,
-      'quizProgress.wrongCount': 0,
-      'quizProgress.combo': 0,
-      showFeedback: false,
-      userAnswer: '',
-      selectedOption: ''
-    });
+    if (this.data.isEndlessMode) {
+      // 无尽模式：初始化时只生成第一题
+      const firstQuestion = this.generateRandomQuestion();
+      this.setData({
+        questions: [firstQuestion],
+        'quizProgress.currentQuestion': 1,
+        'quizProgress.totalQuestions': 1,
+        'quizProgress.timeElapsed': 0,
+        'quizProgress.accuracy': 100,
+        'quizProgress.correctCount': 0,
+        'quizProgress.wrongCount': 0,
+        'quizProgress.combo': 0,
+        showFeedback: false,
+        userAnswer: '',
+        selectedOption: ''
+      });
+    } else {
+      // 普通模式：从题库中随机选择固定数量的题目
+      const shuffledQuestions = this.data.questionBank.sort(() => Math.random() - 0.5);
+      const selectedQuestions = shuffledQuestions.slice(0, this.data.quizSettings.questionCount);
+      
+      this.setData({
+        questions: selectedQuestions,
+        'quizProgress.currentQuestion': 1,
+        'quizProgress.totalQuestions': selectedQuestions.length,
+        'quizProgress.timeElapsed': 0,
+        'quizProgress.accuracy': 100,
+        'quizProgress.correctCount': 0,
+        'quizProgress.wrongCount': 0,
+        'quizProgress.combo': 0,
+        showFeedback: false,
+        userAnswer: '',
+        selectedOption: ''
+      });
+    }
     
     this.loadNextQuestion();
     this.startTimer();
+  },
+
+  // 生成随机题目（用于无尽模式）
+  generateRandomQuestion() {
+    const questionBank = this.data.questionBank;
+    const randomIndex = Math.floor(Math.random() * questionBank.length);
+    return questionBank[randomIndex];
   },
 
   // 加载下一题
@@ -555,20 +580,36 @@ Page({
   nextQuestion() {
     const progress = this.data.quizProgress;
     
-    if (progress.currentQuestion >= progress.totalQuestions) {
-      this.finishQuiz();
-      return;
+    if (this.data.isEndlessMode) {
+      // 无尽模式：动态生成下一题
+      const nextQuestion = this.generateRandomQuestion();
+      const questions = [...this.data.questions, nextQuestion];
+      
+      progress.currentQuestion++;
+      progress.totalQuestions = questions.length;
+      
+      // 无尽模式下不计算百分比进度，显示已答题数
+      this.setData({
+        questions: questions,
+        quizProgress: progress
+      });
+    } else {
+      // 普通模式：检查是否已完成所有题目
+      if (progress.currentQuestion >= progress.totalQuestions) {
+        this.finishQuiz();
+        return;
+      }
+      
+      progress.currentQuestion++;
+      
+      // 计算进度百分比
+      const progressPercent = Math.round((progress.currentQuestion - 1) / progress.totalQuestions * 100);
+      
+      this.setData({
+        quizProgress: progress,
+        progressPercent: progressPercent
+      });
     }
-    
-    progress.currentQuestion++;
-    
-    // 计算进度百分比
-    const progressPercent = Math.round((progress.currentQuestion - 1) / progress.totalQuestions * 100);
-    
-    this.setData({
-      quizProgress: progress,
-      progressPercent: progressPercent
-    });
     
     this.loadNextQuestion();
   },
@@ -659,9 +700,10 @@ Page({
   },
 
   // 返回首页
+  // 返回上一页
   backToHome() {
-    wx.switchTab({
-      url: '/pages/index/index'
+    wx.navigateBack({
+      delta: 1
     });
   },
 

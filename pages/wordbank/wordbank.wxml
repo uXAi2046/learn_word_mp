@@ -1,8 +1,245 @@
 <!--pages/wordbank/wordbank.wxml-->
 <view class="wordbank-container">
-  <view class="placeholder-content">
-    <text class="placeholder-icon">📖</text>
-    <text class="placeholder-text">单词库</text>
-    <text class="placeholder-desc">敬请期待...</text>
+  <!-- 顶部搜索和筛选 -->
+  <view class="header-section">
+    <!-- 学习进度卡片 -->
+    <view class="progress-card">
+      <view class="progress-header">
+        <text class="progress-icon">📊</text>
+        <text class="progress-title">今日学习进度</text>
+      </view>
+      <view class="progress-content">
+        <view class="progress-stats">
+          <text class="progress-text">目标: {{todayTarget}}个单词</text>
+          <text class="progress-text">已学: {{todayLearned}}个</text>
+          <text class="progress-text">剩余: {{todayTarget - todayLearned}}个</text>
+        </view>
+        <view class="progress-bar">
+          <view class="progress-fill" style="width: {{todayProgress}}%"></view>
+        </view>
+        <text class="progress-percent">{{todayProgress}}%</text>
+      </view>
+    </view>
+
+    <!-- 搜索栏 -->
+    <view class="search-section">
+      <view class="search-bar">
+        <text class="search-icon">🔍</text>
+        <input 
+          class="search-input" 
+          placeholder="搜索单词、释义、例句..."
+          value="{{searchKeyword}}"
+          bindinput="onSearchInput"
+          confirm-type="search"
+        />
+        <text 
+          wx:if="{{searchKeyword}}" 
+          class="clear-search" 
+          bindtap="clearSearch"
+        >✕</text>
+      </view>
+      <view class="filter-btn" bindtap="toggleFilters">
+        <text class="filter-icon">⚙️</text>
+        <text class="filter-text">筛选</text>
+        <text wx:if="{{showFilters}}" class="filter-arrow">▲</text>
+        <text wx:else class="filter-arrow">▼</text>
+      </view>
+    </view>
+
+    <!-- 筛选器 -->
+    <view class="filters-section" wx:if="{{showFilters}}">
+      <view class="filter-row">
+        <text class="filter-label">教材版本:</text>
+        <picker 
+          range="{{textbookOptions}}" 
+          value="{{textbookOptions.indexOf(selectedTextbook)}}"
+          bindchange="onTextbookChange"
+        >
+          <view class="filter-picker">{{selectedTextbook}} ▼</view>
+        </picker>
+      </view>
+      
+      <view class="filter-row">
+        <text class="filter-label">年级:</text>
+        <picker 
+          range="{{gradeOptions}}" 
+          value="{{gradeOptions.indexOf(selectedGrade)}}"
+          bindchange="onGradeChange"
+        >
+          <view class="filter-picker">{{selectedGrade}} ▼</view>
+        </picker>
+      </view>
+      
+      <view class="filter-row">
+        <text class="filter-label">单元:</text>
+        <picker 
+          range="{{unitOptions}}" 
+          value="{{unitOptions.indexOf(selectedUnit)}}"
+          bindchange="onUnitChange"
+        >
+          <view class="filter-picker">{{selectedUnit}} ▼</view>
+        </picker>
+      </view>
+      
+      <view class="filter-row">
+        <text class="filter-label">重要程度:</text>
+        <picker 
+          range="{{importanceOptions}}" 
+          value="{{importanceOptions.indexOf(selectedImportance)}}"
+          bindchange="onImportanceChange"
+        >
+          <view class="filter-picker">{{selectedImportance}} ▼</view>
+        </picker>
+      </view>
+      
+      <!-- 筛选器操作按钮 -->
+      <view class="filter-actions">
+        <view class="filter-action-btn reset-btn" bindtap="resetFilters">
+          <text class="action-text">重置</text>
+        </view>
+        <view class="filter-action-btn apply-btn" bindtap="applyFilters">
+          <text class="action-text">应用</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 工具栏 -->
+    <view class="toolbar">
+      <view class="display-mode">
+        <text 
+          class="mode-btn {{displayMode === 'list' ? 'active' : ''}}"
+          bindtap="toggleDisplayMode"
+        >列表</text>
+        <text 
+          class="mode-btn {{displayMode === 'card' ? 'active' : ''}}"
+          bindtap="toggleDisplayMode"
+        >卡片</text>
+      </view>
+      
+      <view class="sort-options">
+        <text class="sort-label">排序:</text>
+        <text 
+          class="sort-btn {{sortBy === 'textbook' ? 'active' : ''}}"
+          data-sort="textbook"
+          bindtap="onSortChange"
+        >教材</text>
+        <text 
+          class="sort-btn {{sortBy === 'alphabet' ? 'active' : ''}}"
+          data-sort="alphabet"
+          bindtap="onSortChange"
+        >字母</text>
+        <text 
+          class="sort-btn {{sortBy === 'importance' ? 'active' : ''}}"
+          data-sort="importance"
+          bindtap="onSortChange"
+        >重要度</text>
+        <text 
+          class="sort-btn {{sortBy === 'favorite' ? 'active' : ''}}"
+          data-sort="favorite"
+          bindtap="onSortChange"
+        >收藏</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 单词列表 -->
+  <view class="word-list">
+    <!-- 列表模式 -->
+    <view wx:if="{{displayMode === 'list'}}" class="list-mode">
+      <view 
+        wx:for="{{filteredWordList}}" 
+        wx:key="id"
+        class="word-item-list"
+        data-id="{{item.id}}"
+        bindtap="viewWordDetail"
+      >
+        <view class="word-main">
+          <view class="word-header">
+            <text class="word-text">{{item.word}}</text>
+            <text class="word-pronunciation">🔊</text>
+            <text 
+              class="favorite-btn {{item.isFavorite ? 'favorited' : ''}}"
+              data-id="{{item.id}}"
+              catchtap="toggleFavorite"
+            >{{item.isFavorite ? '❤️' : '🤍'}}</text>
+          </view>
+          
+          <view class="word-info">
+            <text class="word-pos">{{item.partOfSpeech}}</text>
+            <text class="word-translation">{{item.translation}}</text>
+          </view>
+          
+          <view class="word-meta">
+            <text class="word-source">{{item.textbook}} {{item.grade}} {{item.unit}}</text>
+            <text class="importance-tag importance-{{item.importance === '必考' ? 'required' : item.importance === '常考' ? 'common' : 'understand'}}">{{item.importance}}</text>
+            <text class="mastery-level">熟练度: {{item.masteryLevel}}%</text>
+            <text class="last-review">上次复习: {{item.lastReviewTime}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 卡片模式 -->
+    <view wx:if="{{displayMode === 'card'}}" class="card-mode">
+      <view 
+        wx:for="{{filteredWordList}}" 
+        wx:key="id"
+        class="word-item-card"
+        data-id="{{item.id}}"
+        bindtap="viewWordDetail"
+      >
+        <view class="card-header">
+          <view class="word-title">
+            <text class="word-text">{{item.word}}</text>
+            <text class="word-pronunciation">🔊</text>
+          </view>
+          <text 
+            class="favorite-btn {{item.isFavorite ? 'favorited' : ''}}"
+            data-id="{{item.id}}"
+            catchtap="toggleFavorite"
+          >{{item.isFavorite ? '❤️' : '🤍'}}</text>
+        </view>
+        
+        <view class="card-content">
+          <view class="word-meaning">
+            <text class="word-pos">{{item.partOfSpeech}}</text>
+            <text class="word-translation">{{item.translation}}</text>
+          </view>
+          
+          <view class="word-example" wx:if="{{item.exampleSentence}}">
+            <text class="example-label">📝 例句:</text>
+            <text class="example-text">{{item.exampleSentence}}</text>
+            <text class="example-translation">{{item.exampleTranslation}}</text>
+          </view>
+        </view>
+        
+        <view class="card-footer">
+          <view class="word-tags">
+            <text class="source-tag">{{item.textbook}}</text>
+            <text class="grade-tag">{{item.grade}}</text>
+            <text class="importance-tag importance-{{item.importance === '必考' ? 'required' : item.importance === '常考' ? 'common' : 'understand'}}">{{item.importance}}</text>
+          </view>
+          
+          <view class="mastery-info">
+            <text class="mastery-text">熟练度: {{item.masteryLevel}}%</text>
+            <view class="mastery-bar">
+              <view class="mastery-fill" style="width: {{item.masteryLevel}}%"></view>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 空状态 -->
+    <view wx:if="{{filteredWordList.length === 0}}" class="empty-state">
+      <text class="empty-icon">📖</text>
+      <text class="empty-text">暂无符合条件的单词</text>
+      <text class="empty-desc">试试调整筛选条件</text>
+    </view>
+  </view>
+
+  <!-- 加载状态 -->
+  <view wx:if="{{loading}}" class="loading-state">
+    <text class="loading-text">加载中...</text>
   </view>
 </view>

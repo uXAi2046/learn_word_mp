@@ -73,8 +73,13 @@
   <!-- 答题进行中界面 -->
   <view class="quiz-progress" wx:if="{{currentPage === 'quiz-progress'}}">
     <!-- 进度信息 -->
-    <view class="progress-header" style="--progress-percent: {{progressPercent || 0}}%">
-      <text class="progress-info">第{{quizProgress.currentQuestion}}/{{quizProgress.totalQuestions}}题</text>
+    <view class="progress-header" style="--progress-percent: {{isEndlessMode ? 0 : (progressPercent || 0)}}%">
+      <text class="progress-info" wx:if="{{!isEndlessMode}}">第{{quizProgress.currentQuestion}}/{{quizProgress.totalQuestions}}题</text>
+      <text class="progress-info" wx:else>已答题数: {{quizProgress.currentQuestion - 1}}</text>
+      <view class="endless-mode-indicator" wx:if="{{isEndlessMode}}">
+        <text class="endless-text">♾️ 无尽模式</text>
+        <button class="finish-button" bindtap="finishQuiz" size="mini">结束答题</button>
+      </view>
     </view>
     
     <!-- 题目卡片 -->
@@ -82,8 +87,10 @@
       <!-- 选择题 -->
       <view class="question-content" wx:if="{{currentQuestionData.type === 'choice'}}">
         <view class="question-type">🔤 选择题</view>
-        <view class="question-word">{{currentQuestionData.word}}</view>
-        <view class="question-phonetic" wx:if="{{currentQuestionData.phonetic}}">{{currentQuestionData.phonetic}}</view>
+        <view class="question-word-line">
+          <text class="question-word">{{currentQuestionData.word}}</text>
+          <text class="question-phonetic" wx:if="{{currentQuestionData.phonetic}}">{{currentQuestionData.phonetic}}</text>
+        </view>
         <view class="play-pronunciation" bindtap="playPronunciation">🔊 播放发音</view>
         <view class="question-prompt">请选择正确的中文释义:</view>
       </view>
@@ -132,8 +139,10 @@
       
       <view class="word-detail">
         <view class="word-info">
-          <text class="word-name">{{currentQuestionData.word}}</text>
-          <text class="word-phonetic" wx:if="{{currentQuestionData.phonetic}}">{{currentQuestionData.phonetic}}</text>
+          <view class="word-name-line">
+            <text class="word-name">{{currentQuestionData.word}}</text>
+            <text class="word-phonetic" wx:if="{{currentQuestionData.phonetic}}">{{currentQuestionData.phonetic}}</text>
+          </view>
           <text class="word-meaning">{{currentQuestionData.meaning}}</text>
         </view>
 

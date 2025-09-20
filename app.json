@@ -3,8 +3,10 @@
     "pages/splash/splash",
     "pages/home/home",
     "pages/study-detail/study-detail",
+    "pages/study-stats/study-stats",
     "pages/quiz/quiz",
     "pages/wordbank/wordbank",
+    "pages/word-detail/word-detail",
     "pages/knowledge/knowledge",
     "pages/profile/profile"
   ],
@@ -26,12 +28,6 @@
         "text": "首页",
         "iconPath": "images/home.png",
         "selectedIconPath": "images/home-active.png"
-      },
-      {
-        "pagePath": "pages/quiz/quiz",
-        "text": "答题",
-        "iconPath": "images/quiz.png",
-        "selectedIconPath": "images/quiz-active.png"
       },
       {
         "pagePath": "pages/wordbank/wordbank",
