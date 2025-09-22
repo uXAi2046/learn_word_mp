@@ -65,32 +65,12 @@
     </view>
     <view class="mode-content">
       <view class="mode-grid">
-        <view class="mode-item {{selectedMode === 'recognition' ? 'active' : ''}}" 
-                bindtap="onSelectMode" data-mode="recognition">
-          <text class="mode-icon">👁️</text>
-          <text class="mode-name">认识模式</text>
-          <text class="mode-desc">看英文选中文</text>
-        </view>
-        
-        <view class="mode-item {{selectedMode === 'spelling' ? 'active' : ''}}" 
-                bindtap="onSelectMode" data-mode="spelling">
-          <text class="mode-icon">✏️</text>
-          <text class="mode-name">拼写模式</text>
-          <text class="mode-desc">听音频写单词</text>
-        </view>
-        
-        <view class="mode-item {{selectedMode === 'translation' ? 'active' : ''}}" 
-                bindtap="onSelectMode" data-mode="translation">
-          <text class="mode-icon">🔄</text>
-          <text class="mode-name">翻译模式</text>
-          <text class="mode-desc">看中文选英文</text>
-        </view>
-        
-        <view class="mode-item {{selectedMode === 'review' ? 'active' : ''}}" 
-                bindtap="onSelectMode" data-mode="review">
-          <text class="mode-icon">📖</text>
-          <text class="mode-name">复习模式</text>
-          <text class="mode-desc">复习已学单词</text>
+        <view wx:for="{{studyModes}}" wx:key="id" 
+              class="mode-item {{item.active ? 'active' : ''}}" 
+              bindtap="onSelectMode" data-mode="{{item.id}}">
+          <text class="mode-icon">{{item.icon}}</text>
+          <text class="mode-name">{{item.name}}</text>
+          <text class="mode-desc">{{item.description}}</text>
         </view>
       </view>
     </view>
@@ -124,11 +104,11 @@
   </view>
 
   <view class="action-buttons">
-    <view class="btn btn-secondary" role="button" aria-label="暂停学习" bindtap="onPauseStudy">
-      暂停学习
+    <view class="btn btn-secondary {{!buttonStates.showPauseButton ? 'hidden' : ''}}" role="button" aria-label="{{buttonStates.pauseStudyText}}" bindtap="onPauseStudy" wx:if="{{buttonStates.showPauseButton}}">
+      {{buttonStates.pauseStudyText}}
     </view>
-    <view class="btn btn-primary {{!selectedMode ? 'disabled' : ''}}" role="button" aria-label="{{currentWord ? '下一个单词' : '开始学习'}}" bindtap="{{!selectedMode ? '' : 'onContinueNext'}}">
-      {{currentWord ? '下一个单词' : '开始学习'}}
+    <view class="btn btn-primary {{!selectedMode ? 'disabled' : ''}}" role="button" aria-label="{{buttonStates.startStudyText}}" bindtap="{{!selectedMode ? '' : 'onStartStudy'}}">
+      {{buttonStates.startStudyText}}
     </view>
   </view>
 

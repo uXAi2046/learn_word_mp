@@ -1,0 +1,299 @@
+<!--pages/listening/listening.wxml-->
+<view class="container">
+  <!-- 导航栏 -->
+  <view class="nav-bar">
+    <view class="back-btn" bindtap="onBack">
+      <text class="back-icon">←</text>
+      <text>返回</text>
+    </view>
+    <view class="help-btn" bindtap="onShowHelp">
+      <text>帮助</text>
+    </view>
+  </view>
+
+  <!-- 学习进度 -->
+  <view class="progress-card">
+    <view class="progress-header">
+      <text class="progress-title">听力训练</text>
+      <text class="progress-count">{{currentIndex + 1}}/{{totalWords}}</text>
+    </view>
+    <view class="progress-bar">
+      <view class="progress-fill" style="width: {{progressPercentage}}%"></view>
+    </view>
+    <text class="progress-text">完成进度 {{progressPercentage}}%</text>
+  </view>
+
+  <!-- 单词展示区域 -->
+  <view class="word-display">
+    <view class="word-text" wx:if="{{showWord}}">{{currentWord.word}}</view>
+    <view class="word-phonetic">{{currentWord.phonetic}}</view>
+    <view class="word-meaning" wx:if="{{showMeaning}}">{{currentWord.meaning}}</view>
+    
+    <!-- 音频控制 -->
+    <view class="audio-controls">
+      <view class="audio-btn {{isPlaying ? 'playing' : ''}}" bindtap="onPlayAudio">
+        <text class="audio-icon">{{isPlaying ? '⏸' : '▶'}}</text>
+        <text>{{isPlaying ? '暂停' : '播放'}}</text>
+      </view>
+      <view class="audio-btn" bindtap="onSlowPlay">
+        <text class="audio-icon">🐌</text>
+        <text>慢速</text>
+      </view>
+      <view class="audio-btn" bindtap="onRepeatPlay">
+        <text class="audio-icon">🔄</text>
+        <text>重复</text>
+      </view>
+    </view>
+
+    <!-- 播放次数提示 -->
+    <view class="play-count" wx:if="{{playCount > 0}}">
+      <text>已播放 {{playCount}} 次</text>
+    </view>
+  </view>
+
+  <!-- 听力练习区域 -->
+  <view class="listening-practice">
+    <!-- 练习模式选择 -->
+    <view class="practice-modes">
+      <view class="mode-tab {{practiceMode === 'listen' ? 'active' : ''}}" 
+            bindtap="onSelectMode" data-mode="listen">
+        <text class="mode-icon">👂</text>
+        <text>听音识词</text>
+      </view>
+      <view class="mode-tab {{practiceMode === 'speak' ? 'active' : ''}}" 
+            bindtap="onSelectMode" data-mode="speak">
+        <text class="mode-icon">🎤</text>
+        <text>跟读练习</text>
+      </view>
+      <view class="mode-tab {{practiceMode === 'dictation' ? 'active' : ''}}" 
+            bindtap="onSelectMode" data-mode="dictation">
+        <text class="mode-icon">✍️</text>
+        <text>听写练习</text>
+      </view>
+    </view>
+
+    <!-- 听音识词模式 -->
+    <view class="listen-mode" wx:if="{{practiceMode === 'listen'}}">
+      <view class="question-text">请选择你听到的单词：</view>
+      <view class="options-grid">
+        <view class="option-item {{selectedOption === index ? 'selected' : ''}} {{showAnswer && option.isCorrect ? 'correct' : ''}} {{showAnswer && selectedOption === index && !option.isCorrect ? 'incorrect' : ''}}"
+              wx:for="{{listenOptions}}" wx:key="index"
+              bindtap="onSelectOption" data-index="{{index}}">
+          <text>{{option.word}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 跟读练习模式 -->
+    <view class="speak-mode" wx:if="{{practiceMode === 'speak'}}">
+      <view class="speak-instruction">
+        <text class="instruction-text">请跟读单词，系统将评估你的发音</text>
+      </view>
+      
+      <view class="recording-area">
+        <view class="record-btn {{isRecording ? 'recording' : ''}}" bindtap="onToggleRecording">
+          <view class="record-icon">
+            <text wx:if="{{!isRecording}}">🎤</text>
+            <view wx:else class="recording-animation">
+              <view class="wave"></view>
+              <view class="wave"></view>
+              <view class="wave"></view>
+            </view>
+          </view>
+          <text class="record-text">{{isRecording ? '录音中...' : '点击录音'}}</text>
+        </view>
+        
+        <view class="recording-timer" wx:if="{{isRecording}}">
+          <text>{{recordingTime}}s</text>
+        </view>
+      </view>
+
+      <!-- 发音评估结果 -->
+      <view class="pronunciation-result" wx:if="{{pronunciationScore !== null}}">
+        <view class="score-display">
+          <text class="score-label">发音评分：</text>
+          <text class="score-value {{pronunciationScore >= 80 ? 'excellent' : pronunciationScore >= 60 ? 'good' : 'needs-improvement'}}">
+            {{pronunciationScore}}分
+          </text>
+        </view>
+        <view class="score-feedback">
+          <text wx:if="{{pronunciationScore >= 80}}">🎉 发音很棒！</text>
+          <text wx:elif="{{pronunciationScore >= 60}}">👍 发音不错，继续努力！</text>
+          <text wx:else>💪 多练习会更好哦！</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 听写练习模式 -->
+    <view class="dictation-mode" wx:if="{{practiceMode === 'dictation'}}">
+      <view class="dictation-instruction">
+        <text>请根据听到的内容写出完整句子：</text>
+      </view>
+      
+      <view class="sentence-display" wx:if="{{showSentence}}">
+        <text class="sentence-text">{{currentSentence.text}}</text>
+        <text class="sentence-translation">{{currentSentence.translation}}</text>
+      </view>
+
+      <view class="dictation-input">
+        <textarea class="dictation-field {{dictationStatus}}"
+                  placeholder="请输入你听到的句子..."
+                  value="{{dictationInput}}"
+                  bindinput="onDictationInput"
+                  focus="{{dictationFocus}}"
+                  maxlength="200">
+        </textarea>
+        <view class="input-actions">
+          <view class="play-sentence-btn" bindtap="onPlaySentence">
+            <text class="btn-icon">🔊</text>
+            <text>播放句子</text>
+          </view>
+          <view class="check-dictation-btn" bindtap="onCheckDictation">
+            <text>检查</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 操作按钮 -->
+  <view class="action-buttons">
+    <view class="hint-btn" bindtap="onShowHint" wx:if="{{!showAnswer && practiceMode === 'listen'}}">
+      <text>💡 提示</text>
+    </view>
+    <view class="submit-btn" bindtap="onSubmitAnswer" 
+          wx:if="{{(practiceMode === 'listen' && selectedOption !== null) || (practiceMode === 'speak' && pronunciationScore !== null) || (practiceMode === 'dictation' && dictationInput.length > 0)}}">
+      <text>{{showAnswer ? '下一个' : '提交答案'}}</text>
+    </view>
+    <view class="skip-btn" bindtap="onSkipWord">
+      <text>跳过</text>
+    </view>
+  </view>
+
+  <!-- 练习统计 -->
+  <view class="stats-card">
+    <view class="stats-title">练习统计</view>
+    <view class="stats-grid">
+      <view class="stat-item">
+        <text class="stat-value">{{stats.correct}}</text>
+        <text class="stat-label">正确</text>
+      </view>
+      <view class="stat-item">
+        <text class="stat-value">{{stats.incorrect}}</text>
+        <text class="stat-label">错误</text>
+      </view>
+      <view class="stat-item">
+        <text class="stat-value">{{stats.accuracy}}%</text>
+        <text class="stat-label">准确率</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 结果弹窗 -->
+  <view class="result-modal" wx:if="{{showResult}}" bindtap="onHideResult">
+    <view class="result-content" catchtap="stopPropagation">
+      <view class="result-icon {{resultType}}">
+        <text wx:if="{{resultType === 'correct'}}">✅</text>
+        <text wx:else>❌</text>
+      </view>
+      <view class="result-title {{resultType}}">
+        <text wx:if="{{resultType === 'correct'}}">回答正确！</text>
+        <text wx:else>回答错误</text>
+      </view>
+      <view class="result-word">{{currentWord.word}}</view>
+      <view class="result-meaning">{{currentWord.meaning}}</view>
+      
+      <!-- 错误分析 -->
+      <view class="error-analysis" wx:if="{{resultType === 'incorrect' && errorAnalysis.length > 0}}">
+        <view class="analysis-title">错误分析：</view>
+        <view class="analysis-item" wx:for="{{errorAnalysis}}" wx:key="index">
+          <text>• {{item}}</text>
+        </view>
+      </view>
+
+      <view class="result-actions">
+        <view class="play-audio-btn" bindtap="onPlayResultAudio">
+          <text>🔊 播放</text>
+        </view>
+        <view class="next-btn" bindtap="onNextWord">
+          <text>下一个</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 完成练习弹窗 -->
+  <view class="complete-modal" wx:if="{{showComplete}}" bindtap="onHideComplete">
+    <view class="complete-content" catchtap="stopPropagation">
+      <view class="complete-icon">🎉</view>
+      <view class="complete-title">听力训练完成！</view>
+      
+      <view class="complete-stats">
+        <view class="complete-stat">
+          <text class="stat-name">练习时间：</text>
+          <text class="stat-data">{{practiceTime}} 分钟</text>
+        </view>
+        <view class="complete-stat">
+          <text class="stat-name">正确率：</text>
+          <text class="stat-data">{{stats.accuracy}}%</text>
+        </view>
+        <view class="complete-stat">
+          <text class="stat-name">平均发音分：</text>
+          <text class="stat-data">{{averagePronunciation}}分</text>
+        </view>
+      </view>
+
+      <!-- 成就展示 -->
+      <view class="achievements" wx:if="{{achievements.length > 0}}">
+        <view class="achievements-title">获得成就</view>
+        <view class="achievement-list">
+          <view class="achievement-item" wx:for="{{achievements}}" wx:key="index">
+            <text class="achievement-icon">{{item.icon}}</text>
+            <text>{{item.name}}</text>
+          </view>
+        </view>
+      </view>
+
+      <view class="complete-actions">
+        <view class="restart-btn" bindtap="onRestart">
+          <text>重新练习</text>
+        </view>
+        <view class="back-detail-btn" bindtap="onBackToDetail">
+          <text>返回详情</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 帮助说明弹窗 -->
+  <view class="help-modal" wx:if="{{showHelp}}" bindtap="onHideHelp">
+    <view class="help-content" catchtap="stopPropagation">
+      <view class="help-title">听力训练说明</view>
+      
+      <view class="help-section">
+        <view class="help-subtitle">听音识词</view>
+        <text class="help-text">• 仔细听单词发音，从选项中选择正确答案</text>
+        <text class="help-text">• 可以重复播放音频帮助理解</text>
+        <text class="help-text">• 答错时会显示详细的错误分析</text>
+      </view>
+
+      <view class="help-section">
+        <view class="help-subtitle">跟读练习</view>
+        <text class="help-text">• 听完标准发音后，点击录音按钮跟读</text>
+        <text class="help-text">• 系统会对你的发音进行评分</text>
+        <text class="help-text">• 多次练习可以提高发音准确度</text>
+      </view>
+
+      <view class="help-section">
+        <view class="help-subtitle">听写练习</view>
+        <text class="help-text">• 听完整句子后，写出你听到的内容</text>
+        <text class="help-text">• 注意单词拼写和语法结构</text>
+        <text class="help-text">• 可以多次播放句子音频</text>
+      </view>
+
+      <view class="help-close" bindtap="onHideHelp">
+        <text>知道了</text>
+      </view>
+    </view>
+  </view>
+</view>

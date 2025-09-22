@@ -1,0 +1,319 @@
+<!--pages/reading/reading.wxml-->
+<view class="container">
+  <!-- 导航栏 -->
+  <view class="nav-bar">
+    <view class="back-btn" bindtap="onBack">
+      <text class="back-icon">←</text>
+      <text>返回</text>
+    </view>
+    <view class="help-btn" bindtap="onShowHelp">
+      <text>帮助</text>
+    </view>
+  </view>
+
+  <!-- 学习进度 -->
+  <view class="progress-card">
+    <view class="progress-header">
+      <text class="progress-title">阅读理解</text>
+      <text class="progress-count">{{currentIndex + 1}}/{{totalWords}}</text>
+    </view>
+    <view class="progress-bar">
+      <view class="progress-fill" style="width: {{progress}}%"></view>
+    </view>
+    <text class="progress-text">已完成 {{completedCount}} 个单词</text>
+  </view>
+
+  <!-- 单词展示区域 -->
+  <view class="word-display">
+    <text class="word-text">{{currentWord.word}}</text>
+    <text class="word-phonetic">{{currentWord.phonetic}}</text>
+    <view class="audio-controls">
+      <view class="audio-btn {{isPlaying ? 'playing' : ''}}" bindtap="onPlayAudio">
+        <text class="audio-icon">🔊</text>
+        <text>发音</text>
+      </view>
+    </view>
+    <text class="play-count">播放次数: {{playCount}}</text>
+  </view>
+
+  <!-- 阅读理解区域 -->
+  <view class="reading-practice">
+    <!-- 阅读模式选择 -->
+    <view class="reading-modes">
+      <view class="mode-tab {{readingMode === 'context' ? 'active' : ''}}" bindtap="onSelectMode" data-mode="context">
+        <text class="mode-icon">📖</text>
+        <text>语境阅读</text>
+      </view>
+      <view class="mode-tab {{readingMode === 'comprehension' ? 'active' : ''}}" bindtap="onSelectMode" data-mode="comprehension">
+        <text class="mode-icon">🧠</text>
+        <text>理解测试</text>
+      </view>
+      <view class="mode-tab {{readingMode === 'vocabulary' ? 'active' : ''}}" bindtap="onSelectMode" data-mode="vocabulary">
+        <text class="mode-icon">📝</text>
+        <text>词汇标注</text>
+      </view>
+    </view>
+
+    <!-- 语境阅读模式 -->
+    <view class="context-mode" wx:if="{{readingMode === 'context'}}">
+      <view class="passage-container">
+        <view class="passage-header">
+          <text class="passage-title">{{currentPassage.title}}</text>
+          <text class="passage-level">难度: {{currentPassage.level}}</text>
+        </view>
+        <view class="passage-content">
+          <text class="passage-text" bindtap="onSelectText" data-text="{{currentPassage.content}}">{{currentPassage.content}}</text>
+        </view>
+        <view class="passage-translation" wx:if="{{showTranslation}}">
+          <text class="translation-text">{{currentPassage.translation}}</text>
+        </view>
+      </view>
+      
+      <view class="reading-tools">
+        <view class="tool-btn" bindtap="onToggleTranslation">
+          <text class="tool-icon">🌐</text>
+          <text>{{showTranslation ? '隐藏' : '显示'}}翻译</text>
+        </view>
+        <view class="tool-btn" bindtap="onHighlightWord">
+          <text class="tool-icon">🖍️</text>
+          <text>高亮单词</text>
+        </view>
+        <view class="tool-btn" bindtap="onPlayPassage">
+          <text class="tool-icon">🎵</text>
+          <text>朗读文章</text>
+        </view>
+      </view>
+
+      <!-- 词汇解释弹窗 -->
+      <view class="word-popup" wx:if="{{showWordPopup}}" style="left: {{popupPosition.x}}px; top: {{popupPosition.y}}px;">
+        <view class="popup-content">
+          <text class="popup-word">{{selectedWord.word}}</text>
+          <text class="popup-phonetic">{{selectedWord.phonetic}}</text>
+          <text class="popup-meaning">{{selectedWord.meaning}}</text>
+          <view class="popup-actions">
+            <view class="popup-btn" bindtap="onPlayWordAudio">
+              <text>🔊</text>
+            </view>
+            <view class="popup-btn" bindtap="onAddToCollection">
+              <text>⭐</text>
+            </view>
+            <view class="popup-btn" bindtap="onClosePopup">
+              <text>✕</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 理解测试模式 -->
+    <view class="comprehension-mode" wx:if="{{readingMode === 'comprehension'}}">
+      <view class="question-container">
+        <text class="question-number">问题 {{currentQuestionIndex + 1}}/{{questions.length}}</text>
+        <text class="question-text">{{currentQuestion.question}}</text>
+      </view>
+
+      <view class="options-container">
+        <view class="option-item {{selectedOption === index ? 'selected' : ''}} {{showResult && index === currentQuestion.correctAnswer ? 'correct' : ''}} {{showResult && selectedOption === index && index !== currentQuestion.correctAnswer ? 'incorrect' : ''}}" 
+              wx:for="{{currentQuestion.options}}" 
+              wx:key="index"
+              bindtap="onSelectOption" 
+              data-index="{{index}}">
+          <text class="option-label">{{['A', 'B', 'C', 'D'][index]}}.</text>
+          <text class="option-text">{{item}}</text>
+        </view>
+      </view>
+
+      <view class="question-explanation" wx:if="{{showResult && currentQuestion.explanation}}">
+        <text class="explanation-title">解析:</text>
+        <text class="explanation-text">{{currentQuestion.explanation}}</text>
+      </view>
+    </view>
+
+    <!-- 词汇标注模式 -->
+    <view class="vocabulary-mode" wx:if="{{readingMode === 'vocabulary'}}">
+      <view class="annotation-instruction">
+        <text class="instruction-title">词汇标注练习</text>
+        <text class="instruction-text">请在下面的文章中找出并标注目标单词 "{{currentWord.word}}"</text>
+      </view>
+
+      <view class="annotation-passage">
+        <view class="annotated-text">
+          <text class="text-segment {{item.isTarget ? 'target-word' : ''}} {{item.isAnnotated ? 'annotated' : ''}}" 
+                wx:for="{{annotationText}}" 
+                wx:key="index"
+                bindtap="onAnnotateWord" 
+                data-index="{{index}}">{{item.text}}</text>
+        </view>
+      </view>
+
+      <view class="annotation-stats">
+        <view class="stat-item">
+          <text class="stat-label">已标注:</text>
+          <text class="stat-value">{{annotatedCount}}</text>
+        </view>
+        <view class="stat-item">
+          <text class="stat-label">目标数量:</text>
+          <text class="stat-value">{{targetCount}}</text>
+        </view>
+        <view class="stat-item">
+          <text class="stat-label">准确率:</text>
+          <text class="stat-value">{{accuracy}}%</text>
+        </view>
+      </view>
+
+      <view class="annotation-actions">
+        <view class="reset-btn" bindtap="onResetAnnotation">
+          <text class="btn-icon">🔄</text>
+          <text>重置</text>
+        </view>
+        <view class="check-btn" bindtap="onCheckAnnotation">
+          <text class="btn-icon">✓</text>
+          <text>检查</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 操作按钮 -->
+  <view class="action-buttons">
+    <view class="hint-btn" bindtap="onShowHint">
+      <text>💡 提示</text>
+    </view>
+    <view class="submit-btn" bindtap="onSubmitAnswer">
+      <text>{{readingMode === 'context' ? '完成阅读' : readingMode === 'comprehension' ? '提交答案' : '完成标注'}}</text>
+    </view>
+    <view class="skip-btn" bindtap="onSkipWord">
+      <text>跳过</text>
+    </view>
+  </view>
+
+  <!-- 阅读统计 -->
+  <view class="stats-card">
+    <text class="stats-title">阅读统计</text>
+    <view class="stats-grid">
+      <view class="stat-item">
+        <text class="stat-value">{{stats.correctCount}}</text>
+        <text class="stat-label">正确</text>
+      </view>
+      <view class="stat-item">
+        <text class="stat-value">{{stats.incorrectCount}}</text>
+        <text class="stat-label">错误</text>
+      </view>
+      <view class="stat-item">
+        <text class="stat-value">{{stats.accuracy}}%</text>
+        <text class="stat-label">准确率</text>
+      </view>
+    </view>
+  </view>
+</view>
+
+<!-- 结果弹窗 -->
+<view class="result-modal" wx:if="{{showResultModal}}">
+  <view class="result-content">
+    <text class="result-icon {{isCorrect ? 'correct' : 'incorrect'}}">{{isCorrect ? '✓' : '✗'}}</text>
+    <text class="result-title {{isCorrect ? 'correct' : 'incorrect'}}">{{isCorrect ? '回答正确!' : '回答错误!'}}</text>
+    <text class="result-word">{{currentWord.word}}</text>
+    <text class="result-meaning">{{currentWord.meaning}}</text>
+    
+    <view class="reading-analysis" wx:if="{{!isCorrect}}">
+      <text class="analysis-title">错误分析:</text>
+      <text class="analysis-item">• {{errorAnalysis.reason}}</text>
+      <text class="analysis-item">• {{errorAnalysis.suggestion}}</text>
+    </view>
+
+    <view class="result-actions">
+      <view class="play-audio-btn" bindtap="onPlayResultAudio">
+        <text class="btn-icon">🔊</text>
+        <text>发音</text>
+      </view>
+      <view class="next-btn" bindtap="onNextWord">
+        <text class="btn-icon">→</text>
+        <text>下一个</text>
+      </view>
+    </view>
+  </view>
+</view>
+
+<!-- 完成阅读弹窗 -->
+<view class="complete-modal" wx:if="{{showCompleteModal}}">
+  <view class="complete-content">
+    <text class="complete-icon">🎉</text>
+    <text class="complete-title">阅读练习完成!</text>
+    
+    <view class="complete-stats">
+      <view class="complete-stat">
+        <text class="stat-name">总单词数:</text>
+        <text class="stat-data">{{totalWords}}</text>
+      </view>
+      <view class="complete-stat">
+        <text class="stat-name">正确数量:</text>
+        <text class="stat-data">{{stats.correctCount}}</text>
+      </view>
+      <view class="complete-stat">
+        <text class="stat-name">错误数量:</text>
+        <text class="stat-data">{{stats.incorrectCount}}</text>
+      </view>
+      <view class="complete-stat">
+        <text class="stat-name">准确率:</text>
+        <text class="stat-data">{{stats.accuracy}}%</text>
+      </view>
+      <view class="complete-stat">
+        <text class="stat-name">阅读时间:</text>
+        <text class="stat-data">{{readingTime}}</text>
+      </view>
+    </view>
+
+    <view class="achievements">
+      <text class="achievements-title">获得成就</text>
+      <view class="achievement-list">
+        <view class="achievement-item" wx:for="{{achievements}}" wx:key="index">
+          <text class="achievement-icon">{{item.icon}}</text>
+          <text>{{item.name}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="complete-actions">
+      <view class="restart-btn" bindtap="onRestartReading">
+        <text class="btn-icon">🔄</text>
+        <text>重新开始</text>
+      </view>
+      <view class="back-detail-btn" bindtap="onBackToDetail">
+        <text class="btn-icon">📚</text>
+        <text>返回详情</text>
+      </view>
+    </view>
+  </view>
+</view>
+
+<!-- 帮助说明弹窗 -->
+<view class="help-modal" wx:if="{{showHelpModal}}">
+  <view class="help-content">
+    <text class="help-title">阅读理解帮助</text>
+    
+    <view class="help-section">
+      <text class="help-subtitle">语境阅读模式</text>
+      <text class="help-text">• 在真实语境中学习单词用法</text>
+      <text class="help-text">• 点击文章中的单词查看释义</text>
+      <text class="help-text">• 使用工具栏功能辅助理解</text>
+    </view>
+
+    <view class="help-section">
+      <text class="help-subtitle">理解测试模式</text>
+      <text class="help-text">• 回答与文章内容相关的问题</text>
+      <text class="help-text">• 测试对单词和语境的理解</text>
+      <text class="help-text">• 查看详细的答案解析</text>
+    </view>
+
+    <view class="help-section">
+      <text class="help-subtitle">词汇标注模式</text>
+      <text class="help-text">• 在文章中找出并标注目标单词</text>
+      <text class="help-text">• 提高单词识别和定位能力</text>
+      <text class="help-text">• 实时查看标注准确率</text>
+    </view>
+
+    <view class="help-close" bindtap="onCloseHelp">
+      <text>知道了</text>
+    </view>
+  </view>
+</view>

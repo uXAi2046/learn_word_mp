@@ -1,0 +1,173 @@
+<!--pages/flashcard/flashcard.wxml-->
+<view class="flashcard-container">
+  <!-- 顶部导航栏 -->
+  <view class="nav-bar">
+    <view class="nav-left" bindtap="onBack">
+      <text class="nav-icon">←</text>
+      <text class="nav-text">返回</text>
+    </view>
+    <view class="nav-center">
+      <text class="nav-title">闪卡模式</text>
+    </view>
+    <view class="nav-right" bindtap="onShowSettings">
+      <text class="nav-icon">⚙️</text>
+    </view>
+  </view>
+
+  <!-- 学习进度 -->
+  <view class="progress-section">
+    <view class="progress-info">
+      <text class="progress-text">{{currentIndex + 1}} / {{totalWords}}</text>
+      <text class="progress-percentage">{{progressPercentage}}%</text>
+    </view>
+    <view class="progress-bar">
+      <view class="progress-fill" style="width: {{progressPercentage}}%"></view>
+    </view>
+  </view>
+
+  <!-- 单词卡片区域 -->
+  <view class="card-container">
+    <view class="card {{isFlipped ? 'flipped' : ''}}" bindtap="onFlipCard">
+      <!-- 正面 - 英文单词 -->
+      <view class="card-front">
+        <view class="word-main">
+          <text class="word-text">{{currentWord.word}}</text>
+          <text class="phonetic">{{currentWord.phonetic}}</text>
+        </view>
+        <view class="word-meta">
+          <text class="part-of-speech">{{currentWord.partOfSpeech}}</text>
+          <view class="difficulty-badge difficulty-{{currentWord.difficulty}}">
+            <text>{{currentWord.difficultyText}}</text>
+          </view>
+        </view>
+        <view class="flip-hint">
+          <text>点击翻转查看释义</text>
+        </view>
+      </view>
+
+      <!-- 背面 - 中文释义 -->
+      <view class="card-back">
+        <view class="meaning-section">
+          <text class="meaning-text">{{currentWord.meaning}}</text>
+        </view>
+        <view class="example-section">
+          <view class="example-item">
+            <text class="example-label">例句：</text>
+            <text class="example-english">{{currentWord.example.english}}</text>
+          </view>
+          <view class="example-item">
+            <text class="example-chinese">{{currentWord.example.chinese}}</text>
+          </view>
+        </view>
+        <view class="flip-hint">
+          <text>再次点击返回正面</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 发音按钮 -->
+    <view class="pronunciation-btn" bindtap="onPlayPronunciation">
+      <text class="pronunciation-icon">🔊</text>
+      <text class="pronunciation-text">发音</text>
+    </view>
+  </view>
+
+  <!-- 记忆强度评估 -->
+  <view class="assessment-section">
+    <view class="assessment-title">
+      <text>这个单词你掌握得如何？</text>
+    </view>
+    <view class="assessment-buttons">
+      <view class="assessment-btn difficulty" bindtap="onAssessment" data-level="1">
+        <text class="btn-icon">😰</text>
+        <text class="btn-text">不认识</text>
+        <text class="btn-desc">完全不会</text>
+      </view>
+      <view class="assessment-btn normal" bindtap="onAssessment" data-level="2">
+        <text class="btn-icon">🤔</text>
+        <text class="btn-text">有印象</text>
+        <text class="btn-desc">想一想才知道</text>
+      </view>
+      <view class="assessment-btn easy" bindtap="onAssessment" data-level="3">
+        <text class="btn-icon">😊</text>
+        <text class="btn-text">很熟悉</text>
+        <text class="btn-desc">一看就知道</text>
+      </view>
+      <view class="assessment-btn master" bindtap="onAssessment" data-level="4">
+        <text class="btn-icon">🎯</text>
+        <text class="btn-text">已掌握</text>
+        <text class="btn-desc">完全掌握</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 操作按钮 -->
+  <view class="action-buttons">
+    <view class="action-btn secondary" bindtap="onPrevious" wx:if="{{currentIndex > 0}}">
+      <text>上一个</text>
+    </view>
+    <view class="action-btn primary" bindtap="onNext">
+      <text>{{currentIndex < totalWords - 1 ? '下一个' : '完成学习'}}</text>
+    </view>
+  </view>
+
+  <!-- 学习统计浮层 -->
+  <view class="stats-overlay {{showStats ? 'show' : ''}}" bindtap="onHideStats">
+    <view class="stats-content" catchtap="stopPropagation">
+      <view class="stats-header">
+        <text class="stats-title">学习统计</text>
+        <text class="stats-close" bindtap="onHideStats">×</text>
+      </view>
+      <view class="stats-body">
+        <view class="stat-item">
+          <text class="stat-label">已学习</text>
+          <text class="stat-value">{{studyStats.studied}}</text>
+        </view>
+        <view class="stat-item">
+          <text class="stat-label">掌握</text>
+          <text class="stat-value">{{studyStats.mastered}}</text>
+        </view>
+        <view class="stat-item">
+          <text class="stat-label">需复习</text>
+          <text class="stat-value">{{studyStats.needReview}}</text>
+        </view>
+        <view class="stat-item">
+          <text class="stat-label">正确率</text>
+          <text class="stat-value">{{studyStats.accuracy}}%</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 完成学习弹窗 -->
+  <view class="complete-overlay {{showComplete ? 'show' : ''}}" bindtap="onHideComplete">
+    <view class="complete-content" catchtap="stopPropagation">
+      <view class="complete-header">
+        <text class="complete-icon">🎉</text>
+        <text class="complete-title">学习完成！</text>
+      </view>
+      <view class="complete-stats">
+        <view class="complete-stat">
+          <text class="complete-stat-value">{{studyStats.studied}}</text>
+          <text class="complete-stat-label">个单词</text>
+        </view>
+        <view class="complete-stat">
+          <text class="complete-stat-value">{{studyTime}}</text>
+          <text class="complete-stat-label">分钟</text>
+        </view>
+        <view class="complete-stat">
+          <text class="complete-stat-value">{{studyStats.accuracy}}%</text>
+          <text class="complete-stat-label">正确率</text>
+        </view>
+      </view>
+      <view class="complete-actions">
+        <view class="complete-btn secondary" bindtap="onRestart">
+          <text>重新学习</text>
+        </view>
+        <view class="complete-btn primary" bindtap="onBackToDetail">
+          <text>返回详情</text>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>
