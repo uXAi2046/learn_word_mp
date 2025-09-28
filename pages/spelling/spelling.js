@@ -638,14 +638,6 @@ Page({
   },
 
   /**
-   * 返回上一页
-   */
-  onBack: function() {
-    console.log('返回上一页');
-    wx.navigateBack();
-  },
-
-  /**
    * 显示帮助
    */
   onShowHelp: function() {

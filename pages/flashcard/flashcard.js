@@ -253,14 +253,32 @@ Page({
   onFlipCard: function() {
     console.log('翻转卡片');
     
-    this.setData({
-      isFlipped: !this.data.isFlipped
-    });
-
-    // 添加翻转动画反馈
+    // 添加翻转前的触觉反馈
     wx.vibrateShort({
       type: 'light'
     });
+
+    // 添加翻转动画延迟，让用户感受到交互反馈
+    setTimeout(() => {
+      this.setData({
+        isFlipped: !this.data.isFlipped
+      });
+    }, 50);
+
+    // 显示翻转提示
+    if (!this.data.isFlipped) {
+      wx.showToast({
+        title: '查看释义',
+        icon: 'none',
+        duration: 800
+      });
+    } else {
+      wx.showToast({
+        title: '返回单词',
+        icon: 'none',
+        duration: 800
+      });
+    }
   },
 
   /**

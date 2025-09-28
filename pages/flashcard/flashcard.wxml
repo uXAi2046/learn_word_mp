@@ -1,19 +1,5 @@
 <!--pages/flashcard/flashcard.wxml-->
 <view class="flashcard-container">
-  <!-- 顶部导航栏 -->
-  <view class="nav-bar">
-    <view class="nav-left" bindtap="onBack">
-      <text class="nav-icon">←</text>
-      <text class="nav-text">返回</text>
-    </view>
-    <view class="nav-center">
-      <text class="nav-title">闪卡模式</text>
-    </view>
-    <view class="nav-right" bindtap="onShowSettings">
-      <text class="nav-icon">⚙️</text>
-    </view>
-  </view>
-
   <!-- 学习进度 -->
   <view class="progress-section">
     <view class="progress-info">
@@ -27,7 +13,7 @@
 
   <!-- 单词卡片区域 -->
   <view class="card-container">
-    <view class="card {{isFlipped ? 'flipped' : ''}}" bindtap="onFlipCard">
+    <view class="card {{isFlipped ? 'flipped' : ''}}" bindtap="onFlipCard" hover-class="card-hover" hover-stay-time="100">
       <!-- 正面 - 英文单词 -->
       <view class="card-front">
         <view class="word-main">
@@ -66,7 +52,7 @@
     </view>
 
     <!-- 发音按钮 -->
-    <view class="pronunciation-btn" bindtap="onPlayPronunciation">
+    <view class="pronunciation-btn" bindtap="onPlayPronunciation" hover-class="pronunciation-btn-hover" hover-stay-time="100">
       <text class="pronunciation-icon">🔊</text>
       <text class="pronunciation-text">发音</text>
     </view>
