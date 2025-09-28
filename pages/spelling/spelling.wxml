@@ -142,7 +142,7 @@
           <text>🔊 再听一遍</text>
         </view>
         <view class="result-btn primary" bindtap="onNextWord">
-          <text>{{currentIndex < totalWords - 1 ? '下一个' : '完成练习'}}</text>
+          <text>下一题</text>
         </view>
       </view>
     </view>

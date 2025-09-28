@@ -500,16 +500,20 @@ Page({
    * 下一个单词
    */
   onNextWord: function() {
+    // 先隐藏结果弹窗
+    this.setData({
+      showResult: false
+    });
+    
     if (this.data.currentIndex < this.data.totalWords - 1) {
       const newIndex = this.data.currentIndex + 1;
       this.updateCurrentWord(newIndex);
     } else {
-      this.onCompleteSpelling();
+      // 延迟显示完成弹窗，确保结果弹窗已隐藏
+      setTimeout(() => {
+        this.onCompleteSpelling();
+      }, 100);
     }
-    
-    this.setData({
-      showResult: false
-    });
   },
 
   /**
