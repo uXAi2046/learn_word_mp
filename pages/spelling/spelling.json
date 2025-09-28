@@ -1,8 +1,9 @@
 {
   "usingComponents": {},
   "navigationBarTitleText": "拼写练习",
-  "navigationStyle": "custom",
+  "navigationBarBackgroundColor": "#FFFFFF",
+  "navigationBarTextStyle": "black",
   "enablePullDownRefresh": true,
-  "backgroundColor": "#667eea",
-  "backgroundTextStyle": "light"
+  "backgroundColor": "#F5F5F5",
+  "backgroundTextStyle": "dark"
 }

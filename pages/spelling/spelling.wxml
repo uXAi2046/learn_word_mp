@@ -1,25 +1,12 @@
-<!--pages/spelling/spelling.wxml-->
-<view class="spelling-container">
-  <!-- 导航栏 -->
-  <view class="nav-bar">
-    <view class="back-btn" bindtap="onBack">
-      <text class="back-icon">←</text>
-      <text>返回</text>
-    </view>
-    <view class="help-btn" bindtap="onShowHelp">
-      <text>帮助</text>
-    </view>
-  </view>
-
-  <!-- 学习进度 -->
+<!-- 拼写练习页面 -->
+<view class="page-container">
+  <!-- 进度区域 -->
   <view class="progress-section">
     <view class="progress-info">
-      <text class="progress-text">{{currentIndex + 1}} / {{totalWords}}</text>
-      <text class="progress-percentage">{{progressPercentage}}%</text>
+      <text class="progress-text">{{currentIndex + 1}}/{{totalWords}}</text>
+      <text class="progress-percentage">{{Math.round((currentIndex + 1) / totalWords * 100)}}%</text>
     </view>
-    <view class="progress-bar">
-      <view class="progress-fill" style="width: {{progressPercentage}}%"></view>
-    </view>
+    <progress percent="{{(currentIndex + 1) / totalWords * 100}}" stroke-width="4" activeColor="#4facfe" backgroundColor="#e0e0e0" />
   </view>
 
   <!-- 单词展示区域 -->
@@ -33,8 +20,12 @@
 
       <!-- 音频播放 -->
       <view class="audio-section">
-        <view class="audio-btn {{isPlaying ? 'playing' : ''}}" bindtap="onPlayAudio">
-          <text class="audio-icon">{{isPlaying ? '⏸️' : '🔊'}}</text>
+        <view class="audio-btn {{isPlaying ? 'playing' : ''}} {{audioLoading ? 'loading' : ''}}" bindtap="onPlayAudio">
+          <text class="audio-icon" wx:if="{{!audioLoading}}">{{isPlaying ? '⏸️' : '🔊'}}</text>
+          <view class="loading-spinner" wx:if="{{audioLoading}}"></view>
+        </view>
+        <view class="audio-status" wx:if="{{isPlaying || audioLoading}}">
+          <text class="status-text">{{audioLoading ? '加载中...' : '播放中...'}}</text>
         </view>
         <view class="audio-controls">
           <view class="control-btn" bindtap="onSlowPlay">
@@ -66,8 +57,13 @@
 
         <!-- 字母提示 -->
         <view class="letter-hints" wx:if="{{showHints}}">
-          <view class="hint-title">
-            <text>字母提示：</text>
+          <view class="hint-header">
+            <view class="hint-title">
+              <text>字母提示：</text>
+            </view>
+            <view class="hint-close" bindtap="onHideHint">
+              <text>✕</text>
+            </view>
           </view>
           <view class="letter-grid">
             <view 
@@ -79,6 +75,9 @@
             >
               <text>{{item.revealed ? item.letter : '?'}}</text>
             </view>
+          </view>
+          <view class="hint-tip">
+            <text>点击 "?" 查看对应位置的字母</text>
           </view>
         </view>
       </view>
@@ -98,51 +97,75 @@
     </view>
   </view>
 
-  <!-- 结果反馈 -->
-  <view class="result-overlay {{showResult ? 'show' : ''}}" bindtap="onHideResult">
-    <view class="result-content {{resultType}}" catchtap="stopPropagation">
-      <view class="result-header">
-        <text class="result-icon">{{resultType === 'correct' ? '🎉' : '😅'}}</text>
-        <text class="result-title">{{resultType === 'correct' ? '拼写正确！' : '拼写错误'}}</text>
-      </view>
-      
-      <view class="result-details">
-        <view class="detail-item">
-          <text class="detail-label">正确答案：</text>
-          <text class="detail-value correct">{{currentWord.word}}</text>
+  <!-- 结果反馈弹窗 -->
+  <view class="result-overlay {{showResult ? 'show' : ''}}" catchtap="onHideResult">
+    <view class="result-popup {{resultType}}" catchtap="stopPropagation">
+      <!-- 结果状态 -->
+      <view class="result-status {{resultType}}">
+        <view class="status-icon {{resultType}}">
+          <text class="icon-text">{{resultType === 'correct' ? '✓' : '✗'}}</text>
         </view>
-        <view class="detail-item" wx:if="{{resultType === 'incorrect'}}">
-          <text class="detail-label">你的答案：</text>
-          <text class="detail-value incorrect">{{userInput}}</text>
-        </view>
-        <view class="detail-item">
-          <text class="detail-label">音标：</text>
-          <text class="detail-value">{{currentWord.phonetic}}</text>
-        </view>
-        <view class="detail-item">
-          <text class="detail-label">释义：</text>
-          <text class="detail-value">{{currentWord.meaning}}</text>
+        <view class="status-text">
+          <text class="status-title">{{resultType === 'correct' ? '拼写正确！' : '拼写错误'}}</text>
+          <text class="status-subtitle" wx:if="{{resultType === 'correct'}}">太棒了！继续保持</text>
+          <text class="status-subtitle" wx:if="{{resultType === 'incorrect'}}">别灰心，再试一次</text>
         </view>
       </view>
 
-      <!-- 错误分析 -->
-      <view class="error-analysis" wx:if="{{resultType === 'incorrect' && errorAnalysis.length > 0}}">
-        <view class="analysis-title">
-          <text>错误分析：</text>
+      <!-- 答案详情 -->
+      <view class="answer-details">
+        <view class="answer-card">
+          <view class="word-display">
+            <text class="word-text">{{currentWord.word}}</text>
+            <text class="word-phonetic">{{currentWord.phonetic}}</text>
+          </view>
+          <view class="word-meaning">
+            <text>{{currentWord.meaning}}</text>
+          </view>
         </view>
-        <view class="analysis-list">
-          <view class="analysis-item" wx:for="{{errorAnalysis}}" wx:key="index">
-            <text class="analysis-text">{{item}}</text>
+
+        <!-- 用户答案对比 (仅错误时显示) -->
+        <view class="answer-comparison" wx:if="{{resultType === 'incorrect'}}">
+          <view class="comparison-item user-answer-item">
+            <text class="comparison-label">你的答案</text>
+            <text class="comparison-value user-answer">{{userInput}}</text>
+          </view>
+          <view class="comparison-item correct-answer-item">
+            <text class="comparison-label">正确答案</text>
+            <text class="comparison-value correct-answer">{{currentWord.word}}</text>
           </view>
         </view>
       </view>
 
-      <view class="result-actions">
-        <view class="result-btn secondary" bindtap="onPlayResultAudio">
-          <text>🔊 再听一遍</text>
+      <!-- 错误分析 (仅错误时显示) -->
+      <view class="error-analysis" wx:if="{{resultType === 'incorrect' && errorAnalysis.length > 0}}">
+        <view class="analysis-header">
+          <view class="analysis-icon">💡</view>
+          <text class="analysis-title">错误分析</text>
         </view>
-        <view class="result-btn primary" bindtap="onNextWord">
-          <text>下一题</text>
+        <view class="analysis-content">
+          <view class="analysis-item" wx:for="{{errorAnalysis}}" wx:key="index">
+            <view class="analysis-point">
+              <text class="point-icon">•</text>
+              <text class="point-text">{{item}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 操作按钮 -->
+      <view class="result-actions">
+        <view class="action-button secondary" bindtap="onPlayResultAudio">
+          <view class="button-icon audio-icon">
+            <text>🔊</text>
+          </view>
+          <text class="button-text">再听一遍</text>
+        </view>
+        <view class="action-button primary" bindtap="onNextWord">
+          <view class="button-icon next-icon">
+            <text>→</text>
+          </view>
+          <text class="button-text">下一题</text>
         </view>
       </view>
     </view>
@@ -151,56 +174,81 @@
   <!-- 练习统计 - 移除，不在主界面显示 -->
   <!-- 统计信息将在完成练习弹窗中显示 -->
 
-  <!-- 完成练习弹窗 -->
-  <view class="complete-overlay {{showComplete ? 'show' : ''}}" bindtap="onHideComplete">
-    <view class="complete-content" catchtap="stopPropagation">
-      <view class="complete-header">
-        <text class="complete-icon">🏆</text>
-        <text class="complete-title">拼写练习完成！</text>
-      </view>
-      
-      <view class="complete-stats">
-        <view class="complete-stat-row">
-          <view class="complete-stat">
-            <text class="complete-stat-value">{{stats.correct}}</text>
-            <text class="complete-stat-label">正确</text>
-          </view>
-          <view class="complete-stat">
-            <text class="complete-stat-value">{{stats.incorrect}}</text>
-            <text class="complete-stat-label">错误</text>
-          </view>
+  <!-- 练习完成弹窗 -->
+  <view class="complete-overlay {{showComplete ? 'show' : ''}}" catchtap="onHideComplete">
+    <view class="complete-popup" catchtap="stopPropagation">
+      <!-- 完成状态 -->
+      <view class="complete-status">
+        <view class="complete-icon success">
+          <text class="icon-text">🏆</text>
         </view>
-        <view class="complete-stat-row">
-          <view class="complete-stat">
-            <text class="complete-stat-value">{{stats.accuracy}}%</text>
-            <text class="complete-stat-label">准确率</text>
+        <view class="complete-text">
+          <text class="complete-title">拼写练习完成！</text>
+          <text class="complete-subtitle">恭喜你完成了本次练习</text>
+        </view>
+      </view>
+
+      <!-- 练习统计 -->
+      <view class="practice-stats">
+        <view class="stats-header">
+          <view class="stats-icon">📊</view>
+          <text class="stats-title">练习统计</text>
+        </view>
+        <view class="stats-grid">
+          <view class="stat-item correct">
+            <view class="stat-icon">✅</view>
+            <view class="stat-number">{{stats.correct}}</view>
+            <view class="stat-label">正确数</view>
           </view>
-          <view class="complete-stat">
-            <text class="complete-stat-value">{{practiceTime}}</text>
-            <text class="complete-stat-label">用时(分钟)</text>
+          <view class="stat-item incorrect">
+            <view class="stat-icon">❌</view>
+            <view class="stat-number">{{stats.incorrect}}</view>
+            <view class="stat-label">错误数</view>
+          </view>
+          <view class="stat-item accuracy">
+            <view class="stat-icon">🎯</view>
+            <view class="stat-number">{{stats.accuracy}}%</view>
+            <view class="stat-label">准确率</view>
+          </view>
+          <view class="stat-item time">
+            <view class="stat-icon">⏱️</view>
+            <view class="stat-number">{{practiceTime}}</view>
+            <view class="stat-label">用时(分钟)</view>
           </view>
         </view>
       </view>
 
       <!-- 成就徽章 -->
       <view class="achievement-section" wx:if="{{achievements.length > 0}}">
-        <view class="achievement-title">
-          <text>获得成就：</text>
+        <view class="achievement-header">
+          <view class="achievement-header-icon">🏅</view>
+          <text class="achievement-title">获得成就</text>
         </view>
-        <view class="achievement-list">
-          <view class="achievement-item" wx:for="{{achievements}}" wx:key="index">
-            <text class="achievement-icon">{{item.icon}}</text>
-            <text class="achievement-name">{{item.name}}</text>
+        <view class="achievement-grid">
+          <view class="achievement-badge" wx:for="{{achievements}}" wx:key="index">
+            <view class="badge-icon">
+              <text class="badge-emoji">{{item.icon}}</text>
+            </view>
+            <view class="badge-name">
+              <text>{{item.name}}</text>
+            </view>
           </view>
         </view>
       </view>
 
+      <!-- 操作按钮 -->
       <view class="complete-actions">
-        <view class="complete-btn secondary" bindtap="onRestart">
-          <text>重新练习</text>
+        <view class="complete-button secondary" bindtap="onRestart">
+          <view class="button-icon restart-icon">
+            <text>🔄</text>
+          </view>
+          <text class="button-text">重新开始</text>
         </view>
-        <view class="complete-btn primary" bindtap="onBackToDetail">
-          <text>返回详情</text>
+        <view class="complete-button primary" bindtap="onBackToDetail">
+          <view class="button-icon back-icon">
+            <text>←</text>
+          </view>
+          <text class="button-text">返回</text>
         </view>
       </view>
     </view>

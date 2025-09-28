@@ -42,6 +42,9 @@ Page({
     // 音频播放状态
     isPlaying: false,
     
+    // 音频加载状态
+    audioLoading: false,
+    
     // 显示结果弹窗
     showResult: false,
     
@@ -206,24 +209,33 @@ Page({
       return;
     }
 
-    // 开始播放
+    // 显示加载状态
     this.setData({
-      isPlaying: true
+      audioLoading: true
     });
 
-    // 模拟音频播放
-    wx.showToast({
-      title: `播放 ${this.data.currentWord.word}`,
-      icon: 'none',
-      duration: 1000
-    });
-
-    // 模拟播放时长
+    // 模拟加载延迟
     setTimeout(() => {
+      // 开始播放
       this.setData({
-        isPlaying: false
+        audioLoading: false,
+        isPlaying: true
       });
-    }, 2000);
+
+      // 模拟音频播放
+      wx.showToast({
+        title: `播放 ${this.data.currentWord.word}`,
+        icon: 'none',
+        duration: 1000
+      });
+
+      // 模拟播放时长
+      setTimeout(() => {
+        this.setData({
+          isPlaying: false
+        });
+      }, 2000);
+    }, 300);
 
     // 实际项目中可以使用真实的音频文件
     // const audioContext = this.data.audioContext;
@@ -426,8 +438,28 @@ Page({
       stats: stats
     });
 
+    // 添加触觉反馈
+    wx.vibrateShort();
+
     wx.showToast({
-      title: '提示已显示',
+      title: '点击字母位置查看提示',
+      icon: 'none',
+      duration: 2000
+    });
+  },
+
+  /**
+   * 隐藏提示
+   */
+  onHideHint: function() {
+    console.log('隐藏提示');
+    
+    this.setData({
+      showHints: false
+    });
+
+    wx.showToast({
+      title: '提示已隐藏',
       icon: 'none',
       duration: 1000
     });
@@ -497,21 +529,32 @@ Page({
   },
 
   /**
-   * 下一个单词
+   * 下一题
    */
   onNextWord: function() {
-    // 先隐藏结果弹窗
-    this.setData({
-      showResult: false
-    });
+    console.log('下一题');
     
-    if (this.data.currentIndex < this.data.totalWords - 1) {
-      const newIndex = this.data.currentIndex + 1;
-      this.updateCurrentWord(newIndex);
+    // 隐藏结果弹窗
+    this.setData({
+      showResult: false,
+      userInput: '',
+      inputStatus: 'normal'
+    });
+
+    // 检查是否完成所有单词
+    if (this.data.currentIndex >= this.data.totalWords - 1) {
+      // 完成练习
+      this.onCompleteSpelling();
     } else {
-      // 延迟显示完成弹窗，确保结果弹窗已隐藏
+      // 继续下一题
+      const nextIndex = this.data.currentIndex + 1;
+      this.updateCurrentWord(nextIndex);
+      
+      // 重新获得焦点
       setTimeout(() => {
-        this.onCompleteSpelling();
+        this.setData({
+          inputFocus: true
+        });
       }, 100);
     }
   },
@@ -528,11 +571,18 @@ Page({
       progressPercentage: progressPercentage,
       userInput: '',
       inputStatus: 'normal',
-      inputFocus: true,
+      inputFocus: false, // 先设为false
       showHints: false
     });
 
     this.initLetterHints();
+
+    // 延迟设置焦点，确保页面渲染完成
+    setTimeout(() => {
+      this.setData({
+        inputFocus: true
+      });
+    }, 200);
     
     // 自动播放新单词
     setTimeout(() => {
@@ -546,22 +596,31 @@ Page({
   onCompleteSpelling: function() {
     console.log('完成拼写练习');
     
+    // 确保所有弹窗都已隐藏
+    this.setData({
+      showResult: false,
+      showHelp: false
+    });
+    
     // 计算练习时间
     const practiceTime = Math.round((Date.now() - this.data.startTime) / 60000);
     
     // 计算成就
     const achievements = this.calculateAchievements();
     
-    this.setData({
-      practiceTime: practiceTime,
-      achievements: achievements,
-      showComplete: true
-    });
+    // 延迟显示完成弹窗，确保其他弹窗已完全隐藏
+    setTimeout(() => {
+      this.setData({
+        practiceTime: practiceTime,
+        achievements: achievements,
+        showComplete: true
+      });
 
-    // 触觉反馈
-    wx.vibrateShort({
-      type: 'heavy'
-    });
+      // 触觉反馈
+      wx.vibrateShort({
+        type: 'heavy'
+      });
+    }, 150);
   },
 
   /**
@@ -613,24 +672,24 @@ Page({
     
     this.setData({
       currentIndex: 0,
-      currentWord: this.data.wordList[0],
-      progressPercentage: 0,
       userInput: '',
       inputStatus: 'normal',
-      inputFocus: true,
+      inputFocus: false, // 先设为false
       showHints: false,
+      showResult: false,
       showComplete: false,
-      startTime: Date.now(),
       stats: {
         correct: 0,
         incorrect: 0,
         accuracy: 0,
         hintsUsed: 0
       },
-      answerRecords: new Array(this.data.totalWords).fill(null)
+      answerRecords: [],
+      startTime: Date.now()
     });
 
-    this.initLetterHints();
+    // 更新当前单词
+    this.updateCurrentWord(0);
   },
 
   /**
@@ -666,6 +725,13 @@ Page({
     this.setData({
       showResult: false
     });
+    
+    // 重新获得焦点
+    setTimeout(() => {
+      this.setData({
+        inputFocus: true
+      });
+    }, 100);
   },
 
   /**
