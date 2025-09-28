@@ -425,11 +425,6 @@
   border-color: #CBD5E0;
   transform: scale(0.95);
 }
-  border-radius: 50rpx;
-  color: white;
-  font-size: 28rpx;
-  box-shadow: 0 4rpx 16rpx rgba(74, 144, 226, 0.3);
-}
 
 .hint-btn:active {
   transform: scale(0.95);
