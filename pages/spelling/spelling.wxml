@@ -1,27 +1,32 @@
 <!--pages/spelling/spelling.wxml-->
 <view class="spelling-container">
   <!-- 顶部导航栏 -->
-  <view class="nav-bar">
-    <view class="nav-left" bindtap="onBack">
-      <text class="nav-icon">←</text>
-      <text class="nav-text">返回</text>
+  <view class="top-nav">
+    <view class="nav-left">
+      <view class="back-btn" bindtap="onBack">
+        <text>←</text>
+      </view>
     </view>
     <view class="nav-center">
-      <text class="nav-title">拼写练习</text>
+      <text class="app-name">拼写练习</text>
     </view>
-    <view class="nav-right" bindtap="onShowHelp">
-      <text class="nav-icon">❓</text>
+    <view class="nav-right">
+      <view class="help-btn" bindtap="onShowHelp">
+        <text>❓</text>
+      </view>
     </view>
   </view>
 
   <!-- 学习进度 -->
   <view class="progress-section">
-    <view class="progress-info">
-      <text class="progress-text">{{currentIndex + 1}} / {{totalWords}}</text>
-      <text class="progress-percentage">{{progressPercentage}}%</text>
-    </view>
-    <view class="progress-bar">
-      <view class="progress-fill" style="width: {{progressPercentage}}%"></view>
+    <view class="progress-card">
+      <view class="progress-info">
+        <text class="progress-text">{{currentIndex + 1}} / {{totalWords}}</text>
+        <text class="progress-percentage">{{progressPercentage}}%</text>
+      </view>
+      <view class="progress-bar">
+        <view class="progress-fill" style="width: {{progressPercentage}}%"></view>
+      </view>
     </view>
   </view>
 
@@ -38,7 +43,6 @@
       <view class="audio-section">
         <view class="audio-btn {{isPlaying ? 'playing' : ''}}" bindtap="onPlayAudio">
           <text class="audio-icon">{{isPlaying ? '⏸️' : '🔊'}}</text>
-          <text class="audio-text">{{isPlaying ? '暂停' : '播放发音'}}</text>
         </view>
         <view class="audio-controls">
           <view class="control-btn" bindtap="onSlowPlay">
