@@ -703,6 +703,16 @@ Page({
   },
 
   /**
+   * 返回上一页
+   */
+  onBack: function() {
+    console.log('返回上一页');
+    wx.navigateBack({
+      delta: 1
+    });
+  },
+
+  /**
    * 页面相关事件处理函数--监听用户下拉动作
    */
   onPullDownRefresh: function () {

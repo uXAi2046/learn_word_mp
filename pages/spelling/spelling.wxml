@@ -1,5 +1,16 @@
 <!--pages/spelling/spelling.wxml-->
 <view class="spelling-container">
+  <!-- 导航栏 -->
+  <view class="nav-bar">
+    <view class="back-btn" bindtap="onBack">
+      <text class="back-icon">←</text>
+      <text>返回</text>
+    </view>
+    <view class="help-btn" bindtap="onShowHelp">
+      <text>帮助</text>
+    </view>
+  </view>
+
   <!-- 学习进度 -->
   <view class="progress-section">
     <view class="progress-info">
@@ -137,25 +148,8 @@
     </view>
   </view>
 
-  <!-- 练习统计 - 只在有答题记录时显示 -->
-  <view class="stats-section" wx:if="{{stats.correct > 0 || stats.incorrect > 0}}">
-    <view class="stat-item">
-      <text class="stat-value">{{stats.correct}}</text>
-      <text class="stat-label">正确</text>
-    </view>
-    <view class="stat-item">
-      <text class="stat-value">{{stats.incorrect}}</text>
-      <text class="stat-label">错误</text>
-    </view>
-    <view class="stat-item">
-      <text class="stat-value">{{stats.accuracy}}%</text>
-      <text class="stat-label">准确率</text>
-    </view>
-    <view class="stat-item">
-      <text class="stat-value">{{stats.hintsUsed}}</text>
-      <text class="stat-label">提示次数</text>
-    </view>
-  </view>
+  <!-- 练习统计 - 移除，不在主界面显示 -->
+  <!-- 统计信息将在完成练习弹窗中显示 -->
 
   <!-- 完成练习弹窗 -->
   <view class="complete-overlay {{showComplete ? 'show' : ''}}" bindtap="onHideComplete">
