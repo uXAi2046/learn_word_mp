@@ -1,11 +1,9 @@
 /* pages/spelling/spelling.wxss */
-
-/* 页面容器 */
 .spelling-container {
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #F5F5F5;
   padding: 40rpx 30rpx;
-  color: white;
+  color: #2D3748;
 }
 
 /* 导航栏 */
@@ -21,15 +19,15 @@
   display: flex;
   align-items: center;
   padding: 16rpx 24rpx;
-  background: rgba(255, 255, 255, 0.2);
+  background: #FFFFFF;
   border-radius: 50rpx;
-  color: white;
+  color: #2D3748;
   font-size: 28rpx;
-  backdrop-filter: blur(10rpx);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .back-btn:active {
-  background: rgba(255, 255, 255, 0.3);
+  background: #F7FAFC;
   transform: scale(0.95);
 }
 
@@ -41,11 +39,11 @@
 
 .help-btn {
   padding: 16rpx 24rpx;
-  background: rgba(255, 255, 255, 0.2);
+  background: #FFFFFF;
   border-radius: 50rpx;
-  color: white;
+  color: #2D3748;
   font-size: 28rpx;
-  backdrop-filter: blur(10rpx);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 /* 页面区域 */
@@ -55,11 +53,11 @@
 
 /* 学习进度 */
 .progress-section {
-  background: rgba(255, 255, 255, 0.1);
+  background: #FFFFFF;
   border-radius: 20rpx;
   padding: 30rpx;
   margin-bottom: 30rpx;
-  backdrop-filter: blur(10rpx);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .progress-info {
@@ -72,54 +70,55 @@
 .progress-text {
   font-size: 32rpx;
   font-weight: bold;
-  color: white;
+  color: #2D3748;
 }
 
 .progress-percentage {
   font-size: 28rpx;
-  color: rgba(255, 255, 255, 0.8);
+  color: #718096;
 }
 
 .progress-bar {
   height: 8rpx;
-  background: rgba(255, 255, 255, 0.2);
+  background: #E2E8F0;
   border-radius: 4rpx;
   overflow: hidden;
 }
 
 .progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #00d4aa 0%, #00a8ff 100%);
+  background: linear-gradient(90deg, #4A90E2 0%, #357ABD 100%);
   border-radius: 4rpx;
   transition: width 0.3s ease;
 }
 /* 单词展示区域 */
 .word-section {
+  background: #FFFFFF;
+  border-radius: 20rpx;
+  padding: 40rpx 30rpx;
   margin-bottom: 30rpx;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .word-card {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 20rpx;
-  padding: 40rpx;
-  backdrop-filter: blur(10rpx);
+  margin-bottom: 30rpx;
 }
 
 .word-hint {
-  text-align: center;
-  margin-bottom: 30rpx;
+  margin-bottom: 20rpx;
 }
 
 .hint-label {
   font-size: 28rpx;
-  color: rgba(255, 255, 255, 0.8);
-  margin-right: 10rpx;
+  color: #718096;
+  margin-bottom: 10rpx;
 }
 
 .hint-text {
-  font-size: 32rpx;
+  font-size: 36rpx;
   font-weight: bold;
-  color: white;
+  color: #2D3748;
 }
 
 /* 音频播放区域 */
