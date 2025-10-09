@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="750" height="1200" viewBox="0 0 750 1200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- 渐变定义 -->
+    <linearGradient id="overlayGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:rgba(0,0,0,0.4);stop-opacity:1" />
+      <stop offset="100%" style="stop-color:rgba(0,0,0,0.7);stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="correctGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#28a745;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#20c997;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="incorrectGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#dc3545;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#fd7e14;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="primaryButtonGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#007bff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0056b3;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- 阴影滤镜 -->
+    <filter id="cardShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="rgba(0,0,0,0.15)"/>
+    </filter>
+    
+    <filter id="buttonShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="rgba(0,0,0,0.2)"/>
+    </filter>
+  </defs>
+  
+  <!-- 背景遮罩 -->
+  <rect width="750" height="1334" fill="url(#overlayGradient)"/>
+  
+  <!-- 标题：结果反馈弹窗 -->
+  <text x="375" y="80" text-anchor="middle" fill="white" font-size="32" font-weight="bold">结果反馈弹窗 - 新版布局设计</text>
+  
+  <!-- 弹窗容器 -->
+  <rect x="60" y="180" width="630" height="600" rx="24" ry="24" fill="white" filter="url(#cardShadow)"/>
+  
+  <!-- 1. 顶部状态区域 - 优化间距和视觉层次 -->
+  <g id="statusSection">
+    <!-- 状态背景 -->
+    <rect x="80" y="200" width="590" height="120" rx="16" ry="16" fill="url(#correctGradient)" opacity="0.1"/>
+    
+    <!-- 状态图标 -->
+    <circle cx="150" cy="260" r="30" fill="url(#correctGradient)"/>
+    <text x="150" y="270" text-anchor="middle" fill="white" font-size="28" font-weight="bold">✓</text>
+    
+    <!-- 状态文本 -->
+    <text x="200" y="250" fill="#28a745" font-size="28" font-weight="bold">拼写正确！</text>
+    <text x="200" y="280" fill="#6c757d" font-size="22">太棒了！继续保持</text>
+  </g>
+  
+  <!-- 2. 单词详情卡片 - 重新设计布局 -->
+  <g id="wordDetailsSection">
+    <!-- 卡片背景 -->
+    <rect x="80" y="340" width="590" height="110" rx="16" ry="16" fill="#f8f9fa" stroke="#e9ecef" stroke-width="2"/>
+    
+    <!-- 单词和音标在一行显示 -->
+    <text x="200" y="375" fill="#2d3748" font-size="36" font-weight="bold">challenge</text>
+    <text x="420" y="375" fill="#718096" font-size="24">/ˈtʃælɪndʒ/</text>
+    
+    <!-- 释义区域 -->
+    <rect x="100" y="390" width="550" height="40" rx="8" ry="8" fill="white"/>
+    <text x="375" y="415" text-anchor="middle" fill="#4a5568" font-size="24">挑战；质疑</text>
+  </g>
+  
+  <!-- 3. 答案对比区域 - 仅错误时显示，优化视觉对比 -->
+  <g id="answerComparisonSection">
+    <!-- 用户答案 -->
+    <rect x="80" y="470" width="280" height="80" rx="12" ry="12" fill="#fff5f5" stroke="#fed7d7" stroke-width="2"/>
+    <text x="100" y="500" fill="#e53e3e" font-size="18" font-weight="600">你的答案</text>
+    <text x="220" y="530" text-anchor="middle" fill="#c53030" font-size="24" font-weight="bold">chanelleng</text>
+    
+    <!-- 正确答案 -->
+    <rect x="390" y="470" width="280" height="80" rx="12" ry="12" fill="#f0fff4" stroke="#c6f6d5" stroke-width="2"/>
+    <text x="410" y="500" fill="#38a169" font-size="18" font-weight="600">正确答案</text>
+    <text x="530" y="530" text-anchor="middle" fill="#2f855a" font-size="24" font-weight="bold">challenge</text>
+  </g>
+  
+  <!-- 4. 错误分析区域 - 优化信息展示 -->
+  <g id="errorAnalysisSection">
+    <!-- 分析标题 -->
+    <circle cx="110" cy="580" r="20" fill="#ffd700"/>
+    <text x="110" y="588" text-anchor="middle" fill="white" font-size="20">💡</text>
+    <text x="140" y="588" fill="#2d3748" font-size="24" font-weight="600">错误分析</text>
+    
+    <!-- 分析内容 -->
+    <rect x="80" y="615" width="590" height="80" rx="12" ry="12" fill="#fffaf0" stroke="#fed7aa" stroke-width="1"/>
+    <text x="110" y="650" fill="#744210" font-size="18">• 单词长度过长，应为 9 个字母</text>
+    <text x="110" y="680" fill="#744210" font-size="18">• 部分字母正确，注意单词的整体结构</text>
+  </g>
+  
+  <!-- 5. 底部操作按钮 - 重新设计布局和样式 -->
+  <g id="actionButtonsSection">
+    <!-- 次要按钮：再听一遍 -->
+    <rect x="80" y="700" width="270" height="60" rx="30" ry="30" fill="white" stroke="#e2e8f0" stroke-width="2" filter="url(#buttonShadow)"/>
+    <circle cx="130" cy="730" r="16" fill="#6c757d"/>
+    <text x="130" y="737" text-anchor="middle" fill="white" font-size="14">🔊</text>
+    <text x="215" y="737" text-anchor="middle" fill="#495057" font-size="22" font-weight="600">再听一遍</text>
+    
+    <!-- 主要按钮：下一题 -->
+    <rect x="370" y="700" width="300" height="60" rx="30" ry="30" fill="url(#primaryButtonGradient)" filter="url(#buttonShadow)"/>
+    <circle cx="420" cy="730" r="16" fill="rgba(255,255,255,0.3)"/>
+    <text x="420" y="737" text-anchor="middle" fill="white" font-size="14">→</text>
+    <text x="520" y="737" text-anchor="middle" fill="white" font-size="22" font-weight="bold">下一题</text>
+  </g>
+  
+  <!-- 设计说明标注 -->
+  <g id="designAnnotations">
+    <!-- 标注线和说明 -->
+    <line x1="700" y1="260" x2="750" y2="260" stroke="#ff6b6b" stroke-width="2"/>
+    <text x="760" y="265" fill="#ff6b6b" font-size="16" font-weight="600">1. 状态区域视觉优化</text>
+    
+    <line x1="700" y1="395" x2="750" y2="395" stroke="#4ecdc4" stroke-width="2"/>
+    <text x="760" y="400" fill="#4ecdc4" font-size="16" font-weight="600">2. 单词卡片重新设计</text>
+    
+    <line x1="700" y1="510" x2="750" y2="510" stroke="#45b7d1" stroke-width="2"/>
+    <text x="760" y="515" fill="#45b7d1" font-size="16" font-weight="600">3. 答案对比优化</text>
+    
+    <line x1="700" y1="650" x2="750" y2="650" stroke="#f9ca24" stroke-width="2"/>
+    <text x="760" y="655" fill="#f9ca24" font-size="16" font-weight="600">4. 错误分析重构</text>
+    
+    <line x1="700" y1="730" x2="750" y2="730" stroke="#6c5ce7" stroke-width="2"/>
+    <text x="760" y="735" fill="#6c5ce7" font-size="16" font-weight="600">5. 按钮布局优化</text>
+  </g>
+  
+  <!-- 完成弹窗预览 -->
+  <text x="375" y="820" text-anchor="middle" fill="white" font-size="32" font-weight="bold">练习完成弹窗 - 新版布局设计</text>
+  
+  <!-- 完成弹窗容器 -->
+  <rect x="60" y="870" width="630" height="280" rx="24" ry="24" fill="white" filter="url(#cardShadow)"/>
+  
+  <!-- 完成状态 -->
+  <circle cx="150" cy="930" r="28" fill="#ffd700"/>
+  <text x="150" y="940" text-anchor="middle" fill="white" font-size="22">🏆</text>
+  <text x="200" y="925" fill="#2d3748" font-size="26" font-weight="bold">拼写练习完成！</text>
+  <text x="200" y="950" fill="#6c757d" font-size="18">恭喜你完成了本次练习</text>
+  
+  <!-- 统计网格 -->
+  <rect x="90" y="985" width="130" height="60" rx="12" ry="12" fill="#f0fff4"/>
+  <text x="155" y="1010" text-anchor="middle" fill="#38a169" font-size="20" font-weight="bold">8</text>
+  <text x="155" y="1030" text-anchor="middle" fill="#68d391" font-size="14">正确数</text>
+  
+  <rect x="235" y="985" width="130" height="60" rx="12" ry="12" fill="#fff5f5"/>
+  <text x="300" y="1010" text-anchor="middle" fill="#e53e3e" font-size="20" font-weight="bold">2</text>
+  <text x="300" y="1030" text-anchor="middle" fill="#fc8181" font-size="14">错误数</text>
+  
+  <rect x="380" y="985" width="130" height="60" rx="12" ry="12" fill="#ebf8ff"/>
+  <text x="445" y="1010" text-anchor="middle" fill="#3182ce" font-size="20" font-weight="bold">80%</text>
+  <text x="445" y="1030" text-anchor="middle" fill="#63b3ed" font-size="14">准确率</text>
+  
+  <rect x="525" y="985" width="130" height="60" rx="12" ry="12" fill="#f7fafc"/>
+  <text x="590" y="1010" text-anchor="middle" fill="#4a5568" font-size="20" font-weight="bold">3.5</text>
+  <text x="590" y="1030" text-anchor="middle" fill="#718096" font-size="14">用时(分)</text>
+  
+  <!-- 操作按钮 -->
+  <rect x="90" y="1075" width="255" height="50" rx="25" ry="25" fill="white" stroke="#e2e8f0" stroke-width="2"/>
+  <text x="217.5" y="1105" text-anchor="middle" fill="#495057" font-size="18" font-weight="600">🔄 重新开始</text>
+  
+  <rect x="405" y="1075" width="255" height="50" rx="25" ry="25" fill="url(#primaryButtonGradient)"/>
+  <text x="532.5" y="1105" text-anchor="middle" fill="white" font-size="18" font-weight="bold">← 返回</text>
+</svg>

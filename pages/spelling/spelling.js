@@ -62,8 +62,17 @@ Page({
       hintsUsed: 0
     },
     
-    // 显示完成弹窗
-    showComplete: false,
+    // 显示练习完成弹窗
+    showCompletion: false,
+    
+    // 练习统计数据（用于完成弹窗）
+    practiceStats: {
+      correct: 0,
+      incorrect: 0,
+      accuracy: 0,
+      timeUsed: '0分钟',
+      achievements: []
+    },
     
     // 练习时间
     practiceTime: 0,
@@ -81,7 +90,10 @@ Page({
     audioContext: null,
     
     // 用户答案记录
-    answerRecords: []
+    answerRecords: [],
+
+    // 测试功能控制
+    showTestButtons: false
   },
 
   /**
@@ -89,8 +101,25 @@ Page({
    */
   onLoad: function (options) {
     console.log('拼写练习页面加载', options);
-    this.initPageData();
-    this.loadWordList();
+    
+    // 确保页面数据初始化
+    try {
+      this.initPageData();
+      this.loadWordList();
+      
+      // 确保当前单词被正确设置
+      if (this.data.wordList && this.data.wordList.length > 0) {
+        this.setCurrentWord(0);
+      }
+    } catch (error) {
+      console.error('页面初始化错误:', error);
+      // 显示错误提示
+      wx.showToast({
+        title: '加载失败，请重试',
+        icon: 'none',
+        duration: 2000
+      });
+    }
   },
 
   /**
@@ -127,11 +156,72 @@ Page({
     wx.setNavigationBarTitle({
       title: '拼写练习'
     });
+    
+    // 初始化开始时间
+    this.setData({
+      startTime: Date.now(),
+      stats: {
+        correct: 0,
+        incorrect: 0,
+        accuracy: 0,
+        hintsUsed: 0
+      },
+      practiceStats: {
+        correct: 0,
+        incorrect: 0,
+        accuracy: 0,
+        timeUsed: '0分钟',
+        achievements: []
+      }
+    });
   },
 
   /**
    * 加载单词列表
    */
+  /**
+   * 设置当前单词
+   */
+  setCurrentWord: function(index) {
+    if (!this.data.wordList || this.data.wordList.length === 0) {
+      console.error('单词列表为空');
+      return;
+    }
+    
+    if (index < 0 || index >= this.data.wordList.length) {
+      console.error('单词索引超出范围');
+      return;
+    }
+    
+    const currentWord = this.data.wordList[index];
+    
+    // 重置用户输入和状态
+    this.setData({
+      currentIndex: index,
+      currentWord: currentWord,
+      userInput: '',
+      inputStatus: 'normal',
+      showHints: false,
+      letterHints: Array.from(currentWord.word).map(letter => ({
+        letter: letter,
+        revealed: false
+      }))
+    });
+    
+    // 更新进度
+    this.updateProgress();
+  },
+  
+  /**
+   * 更新进度
+   */
+  updateProgress: function() {
+    const progress = ((this.data.currentIndex + 1) / this.data.totalWords) * 100;
+    this.setData({
+      progressPercentage: progress
+    });
+  },
+  
   loadWordList: function() {
     console.log('加载单词列表');
     
@@ -168,11 +258,12 @@ Page({
         difficulty: 'easy'
       }
     ];
-
+    
+    // 设置单词列表和总数
     this.setData({
       wordList: mockWords,
       totalWords: mockWords.length,
-      currentWord: mockWords[0],
+      currentWord: mockWords.length > 0 ? mockWords[0] : null,
       progressPercentage: 0,
       answerRecords: new Array(mockWords.length).fill(null)
     });
@@ -328,7 +419,22 @@ Page({
       errorAnalysis: errorAnalysis,
       inputStatus: resultType,
       showResult: true,
-      inputFocus: false
+      inputFocus: false,
+      currentResult: {
+        word: this.data.currentWord.word,
+        phonetic: this.data.currentWord.phonetic,
+        meaning: this.data.currentWord.meaning,
+        userAnswer: userInput,
+        correctAnswer: correctAnswer,
+        isCorrect: isCorrect,
+        errorAnalysis: isCorrect ? null : errorAnalysis
+      }
+    });
+
+    // 防止页面滚动并确保弹窗在视口中央
+    wx.pageScrollTo({
+      scrollTop: 0,
+      duration: 0
     });
 
     // 触觉反馈
@@ -604,16 +710,33 @@ Page({
     
     // 计算练习时间
     const practiceTime = Math.round((Date.now() - this.data.startTime) / 60000);
+    const timeUsed = practiceTime > 0 ? `${practiceTime}分钟` : '不到1分钟';
+    
+    // 获取当前最新的统计数据
+    const currentStats = this.data.stats;
+    console.log('当前统计数据:', currentStats);
     
     // 计算成就
     const achievements = this.calculateAchievements();
+    
+    // 准备练习统计数据，确保数据结构与WXML一致
+    const practiceStats = {
+      correct: currentStats.correct,
+      incorrect: currentStats.incorrect,
+      accuracy: currentStats.accuracy || 0,
+      timeUsed: timeUsed,
+      achievements: achievements // 确保成就数据在practiceStats中
+    };
+    
+    console.log('练习统计数据:', practiceStats);
     
     // 延迟显示完成弹窗，确保其他弹窗已完全隐藏
     setTimeout(() => {
       this.setData({
         practiceTime: practiceTime,
-        achievements: achievements,
-        showComplete: true
+        practiceStats: practiceStats,
+        achievements: achievements, // 保持向后兼容
+        showCompletion: true
       });
 
       // 触觉反馈
@@ -667,7 +790,7 @@ Page({
   /**
    * 重新开始练习
    */
-  onRestart: function() {
+  onRestartPractice: function() {
     console.log('重新开始练习');
     
     this.setData({
@@ -677,12 +800,19 @@ Page({
       inputFocus: false, // 先设为false
       showHints: false,
       showResult: false,
-      showComplete: false,
+      showCompletion: false,
       stats: {
         correct: 0,
         incorrect: 0,
         accuracy: 0,
         hintsUsed: 0
+      },
+      practiceStats: {
+        correct: 0,
+        incorrect: 0,
+        accuracy: 0,
+        timeUsed: '0分钟',
+        achievements: []
       },
       answerRecords: [],
       startTime: Date.now()
@@ -690,14 +820,40 @@ Page({
 
     // 更新当前单词
     this.updateCurrentWord(0);
+    
+    // 隐藏完成弹窗后重新获得焦点
+    setTimeout(() => {
+      this.setData({
+        inputFocus: true
+      });
+    }, 300);
   },
 
   /**
-   * 返回学习详情页
+   * 返回首页
    */
-  onBackToDetail: function() {
-    console.log('返回学习详情页');
-    wx.navigateBack();
+  onBackToHome: function() {
+    console.log('返回首页');
+    wx.reLaunch({
+      url: '/pages/index/index'
+    });
+  },
+
+  /**
+   * 完成弹窗确认按钮处理
+   */
+  onConfirmCompletion: function() {
+    // 关闭完成弹窗
+    this.setData({
+      showCompletion: false
+    });
+    // 恢复页面滚动并聚焦输入框
+    this.enablePageScroll && this.enablePageScroll();
+    setTimeout(() => {
+      this.setData({
+        inputFocus: true
+      });
+    }, 100);
   },
 
   /**
@@ -719,6 +875,440 @@ Page({
   },
 
   /**
+   * 显示结果弹窗 - 优化交互方式，确保点击按钮时正确显示弹窗浮层
+   */
+  onShowResult: function() {
+    // 设置弹窗显示状态
+    this.setData({
+      showResult: true,
+      // 禁用输入框焦点，防止键盘弹出
+      inputFocus: false
+    });
+    
+    // 防止页面滚动
+    wx.pageScrollTo({
+      scrollTop: 0,
+      duration: 0
+    });
+    
+    // 阻止页面滚动
+    this.disablePageScroll();
+    
+    // 添加弹窗显示类名以触发动画
+    setTimeout(() => {
+      const query = wx.createSelectorQuery();
+      query.select('.result-overlay').boundingClientRect().exec((res) => {
+        if (Array.isArray(res) && res[0]) {
+          // 触发显示动画
+          this.triggerResultAnimation();
+          
+          // 播放反馈音效
+          this.playFeedbackSound(this.data.resultType);
+        }
+      });
+    }, 50);
+  },
+
+  /**
+   * 触发结果弹窗动画 - 增强视觉反馈
+   */
+  triggerResultAnimation: function() {
+    // 为错误分析区域添加展开动画
+    if (this.data.resultType === 'incorrect') {
+      setTimeout(() => {
+      const query = wx.createSelectorQuery();
+      query.select('.error-analysis-section').boundingClientRect().exec((res) => {
+          if (Array.isArray(res) && res[0]) {
+          // 为错误分析添加渐入动画
+          wx.createAnimation({
+            duration: 300,
+            timingFunction: 'ease-out'
+          }).opacity(1).step();
+        }
+      });
+      }, 300);
+    }
+    
+    // 为单词卡片添加缩放动画
+    setTimeout(() => {
+      const query = wx.createSelectorQuery();
+      query.select('.word-details-section').boundingClientRect().exec((res) => {
+        if (Array.isArray(res) && res[0]) {
+          // 可以在这里添加单词卡片的动画
+        }
+      });
+    }, 150);
+  },
+
+  /**
+   * 播放反馈音效
+   */
+  playFeedbackSound: function(resultType) {
+    const soundUrl = resultType === 'correct' ? 
+      '/assets/sounds/correct.mp3' : 
+      '/assets/sounds/incorrect.mp3';
+    
+    // 播放对应的音效
+    const audioContext = wx.createInnerAudioContext();
+    audioContext.src = soundUrl;
+    audioContext.play();
+  },
+
+  /**
+   * 禁用页面滚动
+   */
+  disablePageScroll: function() {
+    // 设置页面样式，禁止滚动
+    wx.setPageStyle({
+      style: {
+        overflow: 'hidden'
+      }
+    }).catch(err => {
+      console.log('设置页面样式失败', err);
+    });
+  },
+
+  /**
+   * 启用页面滚动
+   */
+  enablePageScroll: function() {
+    // 恢复页面滚动
+    wx.setPageStyle({
+      style: {
+        overflow: 'auto'
+      }
+    }).catch(err => {
+      console.log('恢复页面样式失败', err);
+    });
+  },
+
+  /**
+   * 隐藏结果弹窗 - 优化交互方式
+   */
+  onHideResult: function() {
+    // 添加淡出动画
+    const query = wx.createSelectorQuery();
+    query.select('.result-overlay').boundingClientRect().exec((res) => {
+      if (Array.isArray(res) && res[0]) {
+        // 添加淡出动画类
+        this.setData({
+          resultOverlayFadeOut: true
+        });
+        
+        // 延迟隐藏弹窗，等待动画完成
+        setTimeout(() => {
+          this.setData({
+            showResult: false,
+            resultOverlayFadeOut: false
+          });
+          
+          // 恢复页面滚动
+          this.enablePageScroll();
+          
+          // 重新获得焦点
+          setTimeout(() => {
+            this.setData({
+              inputFocus: true
+            });
+          }, 100);
+        }, 300);
+      } else {
+        // 直接隐藏弹窗
+        this.setData({
+          showResult: false
+        });
+        
+        // 恢复页面滚动
+        this.enablePageScroll();
+        
+        // 重新获得焦点
+        setTimeout(() => {
+          this.setData({
+            inputFocus: true
+          });
+        }, 100);
+      }
+    });
+  },
+
+  /**
+   * 播放结果音频 - 点击"再听一遍"按钮
+   */
+  onPlayResultAudio: function() {
+    // 播放当前单词音频
+    this.playWordAudio();
+    
+    // 添加按钮点击反馈
+    this.setData({
+      playButtonActive: true
+    });
+    
+    // 重置按钮状态
+    setTimeout(() => {
+      this.setData({
+        playButtonActive: false
+      });
+    }, 300);
+  },
+
+  /**
+   * 下一题按钮点击处理
+   */
+  onNextWord: function() {
+    // 隐藏结果弹窗
+    this.onHideResult();
+    
+    // 延迟加载下一题，等待弹窗动画完成
+    setTimeout(() => {
+      // 加载下一个单词
+      this.loadNextWord();
+    }, 350);
+  },
+
+  /**
+   * 显示完成弹窗 - 优化交互方式
+   */
+  onShowCompletion: function() {
+    // 设置弹窗显示状态
+    this.setData({
+      showCompletion: true,
+      // 禁用输入框焦点
+      inputFocus: false
+    });
+    
+    // 防止页面滚动
+    wx.pageScrollTo({
+      scrollTop: 0,
+      duration: 0
+    });
+    
+    // 阻止页面滚动
+    this.disablePageScroll();
+    
+    // 添加弹窗显示类名以触发动画
+    setTimeout(() => {
+      const query = wx.createSelectorQuery();
+      query.select('.completion-overlay').boundingClientRect().exec((res) => {
+        if (Array.isArray(res) && res[0]) {
+          // 触发统计数据动画
+          this.triggerStatsAnimation();
+          
+          // 播放完成音效
+          this.playCompletionSound();
+        }
+      });
+    }, 50);
+  },
+
+  /**
+   * 触发统计数据动画
+   */
+  triggerStatsAnimation: function() {
+    // 统计数据依次显示动画已在CSS中定义
+    // 这里可以添加额外的交互逻辑
+    
+    // 如果有成就徽章，触发徽章动画
+    if (this.data.practiceStats.achievements && this.data.practiceStats.achievements.length > 0) {
+      setTimeout(() => {
+        // 成就徽章浮动动画已在CSS中定义
+      }, 500);
+    }
+  },
+
+  /**
+   * 隐藏练习完成弹窗
+   */
+  onHideCompletion: function() {
+    // 添加淡出动画
+    const query = wx.createSelectorQuery();
+    query.select('.completion-overlay').boundingClientRect().exec((res) => {
+      if (Array.isArray(res) && res[0]) {
+        // 移除显示类名以触发隐藏动画
+        setTimeout(() => {
+          this.setData({
+            showCompletion: false
+          });
+        }, 200);
+      } else {
+        this.setData({
+          showCompletion: false
+        });
+      }
+    });
+  },
+
+  /**
+   * 优化的音频播放反馈
+   */
+  onPlayResultAudio: function() {
+    console.log('播放结果音频:', this.data.currentWord.word);
+    
+    // 添加视觉反馈
+    const query = wx.createSelectorQuery();
+    query.select('.action-button.secondary').boundingClientRect().exec((res) => {
+      if (Array.isArray(res) && res[0]) {
+        // 按钮按下效果已在CSS中定义
+      }
+    });
+    
+    // 播放音频逻辑
+    this.onPlayAudio();
+  },
+
+  /**
+   * 优化的下一题交互
+   */
+  onNextWord: function() {
+    console.log('下一题');
+    
+    // 添加按钮反馈动画
+    const query = wx.createSelectorQuery();
+    query.select('.action-button.primary').boundingClientRect().exec((res) => {
+      if (Array.isArray(res) && res[0]) {
+        // 按钮按下效果已在CSS中定义
+      }
+    });
+    
+    // 隐藏结果弹窗
+    this.onHideResult();
+    
+    // 延迟执行下一题逻辑，确保动画完成
+    setTimeout(() => {
+      const nextIndex = this.data.currentIndex + 1;
+      
+      if (nextIndex >= this.data.totalWords) {
+        // 完成所有练习
+        this.onCompleteSpelling();
+      } else {
+        // 更新到下一个单词
+        this.updateCurrentWord(nextIndex);
+        
+        // 清空输入
+        this.setData({
+          userInput: '',
+          inputStatus: 'normal'
+        });
+        
+        // 重新获得焦点
+        setTimeout(() => {
+          this.setData({
+            inputFocus: true
+          });
+        }, 100);
+      }
+    }, 300);
+  },
+
+  /**
+   * 优化的重新开始交互
+   */
+  onRestartPractice: function() {
+    console.log('重新开始练习');
+    
+    // 添加按钮反馈
+    const query = wx.createSelectorQuery();
+    query.select('.completion-action-button.primary').boundingClientRect().exec((res) => {
+      if (Array.isArray(res) && res[0]) {
+        // 按钮按下效果已在CSS中定义
+      }
+    });
+    
+    // 隐藏完成弹窗
+    this.onHideCompletion();
+    
+    // 延迟重置数据，确保动画完成
+    setTimeout(() => {
+      // 重置所有数据
+      this.setData({
+        currentIndex: 0,
+        userInput: '',
+        inputStatus: 'normal',
+        showResult: false,
+        showCompletion: false,
+        stats: {
+          correct: 0,
+          incorrect: 0,
+          accuracy: 0,
+          hintsUsed: 0
+        },
+        practiceStats: {
+          correct: 0,
+          incorrect: 0,
+          accuracy: 0,
+          timeUsed: '0分钟',
+          achievements: []
+        },
+        practiceTime: 0,
+        startTime: Date.now(),
+        achievements: [],
+        answerRecords: new Array(this.data.totalWords).fill(null)
+      });
+      
+      // 重新加载第一个单词
+      this.updateCurrentWord(0);
+      
+      // 重新获得焦点
+      setTimeout(() => {
+        this.setData({
+          inputFocus: true
+        });
+      }, 100);
+    }, 300);
+  },
+
+  /**
+   * 优化的返回首页交互
+   */
+  onBackToHome: function() {
+    console.log('返回首页');
+    
+    // 添加按钮反馈
+    const query = wx.createSelectorQuery();
+    query.select('.completion-action-button.secondary').boundingClientRect().exec((res) => {
+      if (Array.isArray(res) && res[0]) {
+        // 按钮按下效果已在CSS中定义
+      }
+    });
+    
+    // 延迟导航，确保动画完成
+    setTimeout(() => {
+      wx.navigateBack();
+    }, 200);
+  },
+
+  /**
+   * 显示帮助
+   */
+  onShowHelp: function() {
+    this.setData({
+      showHelp: true
+    });
+  },
+
+  /**
+   * 隐藏帮助
+   */
+  onHideHelp: function() {
+    this.setData({
+      showHelp: false
+    });
+  },
+
+  /**
+   * 显示结果弹窗
+   */
+  onShowResult: function() {
+    this.setData({
+      showResult: true
+    });
+    // 防止页面滚动
+    wx.pageScrollTo({
+      scrollTop: 0,
+      duration: 0
+    });
+  },
+
+  /**
    * 隐藏结果弹窗
    */
   onHideResult: function() {
@@ -735,11 +1325,25 @@ Page({
   },
 
   /**
-   * 隐藏完成弹窗
+   * 显示完成弹窗
    */
-  onHideComplete: function() {
+  onShowCompletion: function() {
     this.setData({
-      showComplete: false
+      showCompletion: true
+    });
+    // 防止页面滚动
+    wx.pageScrollTo({
+      scrollTop: 0,
+      duration: 0
+    });
+  },
+
+  /**
+   * 隐藏练习完成弹窗
+   */
+  onHideCompletion: function() {
+    this.setData({
+      showCompletion: false
     });
   },
 
@@ -748,6 +1352,203 @@ Page({
    */
   stopPropagation: function() {
     // 阻止事件冒泡
+  },
+
+  /**
+   * 键盘弹起时的处理
+   */
+  onKeyboardShow: function() {
+    // 当键盘弹起时，如果有弹窗显示，调整页面位置
+    if (this.data.showResult || this.data.showCompletion) {
+      wx.pageScrollTo({
+        scrollTop: 0,
+        duration: 200
+      });
+    }
+  },
+
+  /**
+   * 键盘收起时的处理
+   */
+  onKeyboardHide: function() {
+    // 键盘隐藏时的处理
+    if (this.data.showResult || this.data.showCompletion) {
+      wx.pageScrollTo({
+        scrollTop: 0,
+        duration: 300
+      });
+    }
+  },
+
+  // 测试功能方法
+  onToggleTestButtons: function() {
+    console.log('切换测试按钮显示');
+    this.setData({
+      showTestButtons: !this.data.showTestButtons
+    });
+  },
+
+  onTestCorrectAnswer: function() {
+    console.log('测试正确答案');
+    const correctAnswer = this.data.currentWord.word;
+    
+    // 设置输入框为正确答案
+    this.setData({
+      userInput: correctAnswer,
+      inputStatus: 'correct'
+    });
+
+    // 更新统计
+    const stats = { ...this.data.stats };
+    stats.correct++;
+    stats.accuracy = Math.round((stats.correct / (stats.correct + stats.incorrect)) * 100);
+
+    // 记录答案
+    const answerRecords = [...this.data.answerRecords];
+    answerRecords[this.data.currentIndex] = {
+      userAnswer: correctAnswer,
+      correctAnswer: correctAnswer,
+      isCorrect: true,
+      testMode: true
+    };
+
+    this.setData({
+      answerRecords: answerRecords,
+      stats: stats,
+      resultType: 'correct',
+      errorAnalysis: [],
+      showResult: true,
+      inputFocus: false,
+      currentResult: {
+        word: this.data.currentWord.word,
+        phonetic: this.data.currentWord.phonetic,
+        meaning: this.data.currentWord.meaning,
+        userAnswer: correctAnswer,
+        correctAnswer: correctAnswer,
+        isCorrect: true,
+        errorAnalysis: null
+      }
+    });
+
+    // 防止页面滚动
+    wx.pageScrollTo({
+      scrollTop: 0,
+      duration: 0
+    });
+
+    // 触觉反馈
+    wx.vibrateShort({
+      type: 'light'
+    });
+  },
+
+  onTestIncorrectAnswer: function() {
+    console.log('测试错误答案');
+    const correctAnswer = this.data.currentWord.word;
+    const incorrectAnswer = correctAnswer.substring(0, correctAnswer.length - 1); // 模拟错误答案
+    
+    // 设置输入框为错误答案
+    this.setData({
+      userInput: incorrectAnswer,
+      inputStatus: 'incorrect'
+    });
+
+    // 更新统计
+    const stats = { ...this.data.stats };
+    stats.incorrect++;
+    stats.accuracy = Math.round((stats.correct / (stats.correct + stats.incorrect)) * 100);
+
+    // 错误分析
+    const errorAnalysis = this.analyzeSpellingError(incorrectAnswer, correctAnswer);
+
+    // 记录答案
+    const answerRecords = [...this.data.answerRecords];
+    answerRecords[this.data.currentIndex] = {
+      userAnswer: incorrectAnswer,
+      correctAnswer: correctAnswer,
+      isCorrect: false,
+      testMode: true
+    };
+
+    this.setData({
+      answerRecords: answerRecords,
+      stats: stats,
+      resultType: 'incorrect',
+      errorAnalysis: errorAnalysis,
+      showResult: true,
+      inputFocus: false,
+      currentResult: {
+        word: this.data.currentWord.word,
+        phonetic: this.data.currentWord.phonetic,
+        meaning: this.data.currentWord.meaning,
+        userAnswer: incorrectAnswer,
+        correctAnswer: correctAnswer,
+        isCorrect: false,
+        errorAnalysis: errorAnalysis
+      }
+    });
+
+    // 防止页面滚动
+    wx.pageScrollTo({
+      scrollTop: 0,
+      duration: 0
+    });
+
+    // 触觉反馈
+    wx.vibrateShort({
+      type: 'medium'
+    });
+  },
+
+  onTestCompletion: function() {
+    console.log('测试完成弹窗');
+    
+    // 模拟完成统计数据
+    const mockStats = {
+      correct: 8,
+      incorrect: 2,
+      accuracy: 80,
+      hintsUsed: 1
+    };
+
+    // 计算练习时间
+    const practiceTime = Math.round((Date.now() - this.data.startTime) / 60000);
+    const timeUsed = practiceTime > 0 ? `${practiceTime}分钟` : '3分钟'; // 使用模拟时间
+
+    // 计算成就
+    const achievements = ['🏆 首次完成', '⚡ 速度达人'];
+
+    // 准备练习统计数据
+    const practiceStats = {
+      correct: mockStats.correct,
+      incorrect: mockStats.incorrect,
+      accuracy: mockStats.accuracy,
+      timeUsed: timeUsed,
+      achievements: achievements
+    };
+
+    console.log('测试模式练习统计数据:', practiceStats);
+
+    // 隐藏其他弹窗
+    this.setData({
+      showResult: false,
+      showHelp: false
+    });
+
+    // 延迟显示完成弹窗
+    setTimeout(() => {
+      this.setData({
+        stats: mockStats, // 更新当前统计
+        practiceStats: practiceStats,
+        achievements: achievements,
+        showCompletion: true
+      });
+
+      // 触觉反馈
+      wx.vibrateShort({
+        type: 'heavy'
+      });
+    }, 150);
   },
 
   /**

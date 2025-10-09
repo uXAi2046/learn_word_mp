@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>拼写练习 - 集成测试</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        .progress-section {
+            background: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #45a049);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .word-section {
+            padding: 30px 20px;
+            text-align: center;
+        }
+
+        .word-hint {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .audio-controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .audio-btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 25px;
+            background: #007AFF;
+            color: white;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .audio-btn:hover {
+            background: #0056b3;
+            transform: translateY(-2px);
+        }
+
+        .audio-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .input-section {
+            padding: 0 20px 20px;
+        }
+
+        .spelling-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            font-size: 18px;
+            text-align: center;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        .spelling-input:focus {
+            border-color: #007AFF;
+        }
+
+        .spelling-input.correct {
+            border-color: #4CAF50;
+            background: #f8fff8;
+        }
+
+        .spelling-input.incorrect {
+            border-color: #f44336;
+            background: #fff8f8;
+        }
+
+        .action-buttons {
+            padding: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-hint {
+            background: #FFC107;
+            color: #333;
+        }
+
+        .btn-skip {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-submit {
+            background: #007AFF;
+            color: white;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        /* 测试按钮样式 */
+        .test-section {
+            padding: 20px;
+            background: #f8f9fa;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .test-toggle {
+            width: 100%;
+            padding: 10px;
+            background: #17a2b8;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            margin-bottom: 15px;
+        }
+
+        .test-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .test-btn {
+            flex: 1;
+            min-width: 100px;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .test-btn.success {
+            background: #28a745;
+            color: white;
+        }
+
+        .test-btn.danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .test-btn.info {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .test-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+
+        /* 弹窗样式 */
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .popup-content {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 350px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+
+        .popup-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #007AFF;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .popup-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .popup-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: #007AFF;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* 结果弹窗样式 */
+        .result-popup .popup-content {
+            max-width: 300px;
+        }
+
+        .result-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        .result-message {
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+
+        .correct-answer {
+            background: #f8fff8;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-family: monospace;
+            font-size: 18px;
+            color: #4CAF50;
+        }
+
+        .error-analysis {
+            background: #fff8f8;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 14px;
+            color: #f44336;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 进度区域 -->
+        <div class="progress-section">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill" style="width: 30%"></div>
+            </div>
+            <div class="progress-text" id="progressText">3 / 10</div>
+        </div>
+
+        <!-- 单词展示区域 -->
+        <div class="word-section">
+            <div class="word-hint" id="wordHint">请拼写单词：苹果</div>
+            <div class="audio-controls">
+                <button class="audio-btn" id="playBtn" onclick="playAudio()">🔊 播放</button>
+                <button class="audio-btn" id="slowBtn" onclick="playSlowAudio()">🐌 慢速</button>
+                <button class="audio-btn" id="repeatBtn" onclick="repeatAudio()">🔁 重复</button>
+            </div>
+        </div>
+
+        <!-- 输入区域 -->
+        <div class="input-section">
+            <input type="text" class="spelling-input" id="spellingInput" placeholder="请输入单词拼写" maxlength="20">
+        </div>
+
+        <!-- 操作按钮 -->
+        <div class="action-buttons">
+            <button class="action-btn btn-hint" onclick="showHint()">💡 提示</button>
+            <button class="action-btn btn-skip" onclick="skipWord()">⏭️ 跳过</button>
+            <button class="action-btn btn-submit" onclick="submitAnswer()">✅ 提交</button>
+        </div>
+
+        <!-- 测试功能区域 -->
+        <div class="test-section">
+            <button class="test-toggle" onclick="toggleTestButtons()">🧪 显示/隐藏测试按钮</button>
+            <div class="test-buttons hidden" id="testButtons">
+                <button class="test-btn success" onclick="testCorrectAnswer()">✅ 测试正确</button>
+                <button class="test-btn danger" onclick="testIncorrectAnswer()">❌ 测试错误</button>
+                <button class="test-btn info" onclick="testCompletion()">🏆 测试完成</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 结果弹窗 -->
+    <div class="popup-overlay result-popup hidden" id="resultPopup">
+        <div class="popup-content">
+            <div class="result-icon" id="resultIcon">✅</div>
+            <div class="result-message" id="resultMessage">回答正确！</div>
+            <div class="correct-answer" id="correctAnswer">apple</div>
+            <div class="error-analysis hidden" id="errorAnalysis">错误分析：缺少字母 'e'</div>
+            <div class="popup-buttons">
+                <button class="popup-btn btn-primary" onclick="nextWord()">下一个</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 完成弹窗 -->
+    <div class="popup-overlay hidden" id="completionPopup">
+        <div class="popup-content">
+            <div class="popup-title">🎉 练习完成！恭喜你完成了本轮拼写练习</div>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="correctCount">8</div>
+                    <div class="stat-label">正确</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="incorrectCount">2</div>
+                    <div class="stat-label">错误</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="accuracyRate">80%</div>
+                    <div class="stat-label">准确率</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="timeUsed">3分钟</div>
+                    <div class="stat-label">用时</div>
+                </div>
+            </div>
+            <div class="popup-buttons">
+                <button class="popup-btn btn-primary" onclick="restartPractice()">🔄 再练一轮</button>
+                <button class="popup-btn btn-secondary" onclick="backToHome()">🏠 返回首页</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 模拟数据
+        let currentWord = {
+            word: 'apple',
+            phonetic: '/ˈæpl/',
+            meaning: '苹果'
+        };
+
+        let stats = {
+            correct: 0,
+            incorrect: 0,
+            accuracy: 0
+        };
+
+        let showTestButtons = false;
+
+        // 音频播放
+        function playAudio() {
+            console.log('播放音频:', currentWord.word);
+            // 模拟音频播放
+            const btn = document.getElementById('playBtn');
+            btn.textContent = '🔊 播放中...';
+            btn.disabled = true;
+            
+            setTimeout(() => {
+                btn.textContent = '🔊 播放';
+                btn.disabled = false;
+            }, 1000);
+        }
+
+        function playSlowAudio() {
+            console.log('播放慢速音频:', currentWord.word);
+            const btn = document.getElementById('slowBtn');
+            btn.textContent = '🐌 播放中...';
+            btn.disabled = true;
+            
+            setTimeout(() => {
+                btn.textContent = '🐌 慢速';
+                btn.disabled = false;
+            }, 1500);
+        }
+
+        function repeatAudio() {
+            console.log('重复播放音频:', currentWord.word);
+            playAudio();
+        }
+
+        // 提示功能
+        function showHint() {
+            const input = document.getElementById('spellingInput');
+            const word = currentWord.word;
+            const currentValue = input.value;
+            
+            if (currentValue.length < word.length) {
+                input.value = word.substring(0, currentValue.length + 1);
+            }
+        }
+
+        // 跳过单词
+        function skipWord() {
+            console.log('跳过单词:', currentWord.word);
+            stats.incorrect++;
+            updateStats();
+            showResultPopup(false, currentWord.word, '已跳过');
+        }
+
+        // 提交答案
+        function submitAnswer() {
+            const input = document.getElementById('spellingInput');
+            const userAnswer = input.value.trim().toLowerCase();
+            const correctAnswer = currentWord.word.toLowerCase();
+            
+            if (!userAnswer) {
+                alert('请输入答案');
+                return;
+            }
+            
+            const isCorrect = userAnswer === correctAnswer;
+            
+            if (isCorrect) {
+                stats.correct++;
+                input.className = 'spelling-input correct';
+            } else {
+                stats.incorrect++;
+                input.className = 'spelling-input incorrect';
+            }
+            
+            updateStats();
+            showResultPopup(isCorrect, correctAnswer, userAnswer);
+        }
+
+        // 更新统计
+        function updateStats() {
+            const total = stats.correct + stats.incorrect;
+            stats.accuracy = total > 0 ? Math.round((stats.correct / total) * 100) : 0;
+        }
+
+        // 显示结果弹窗
+        function showResultPopup(isCorrect, correctAnswer, userAnswer) {
+            const popup = document.getElementById('resultPopup');
+            const icon = document.getElementById('resultIcon');
+            const message = document.getElementById('resultMessage');
+            const correctDiv = document.getElementById('correctAnswer');
+            const errorDiv = document.getElementById('errorAnalysis');
+            
+            if (isCorrect) {
+                icon.textContent = '✅';
+                message.textContent = '回答正确！';
+                errorDiv.classList.add('hidden');
+            } else {
+                icon.textContent = '❌';
+                message.textContent = '回答错误';
+                errorDiv.textContent = `你的答案：${userAnswer}`;
+                errorDiv.classList.remove('hidden');
+            }
+            
+            correctDiv.textContent = correctAnswer;
+            popup.classList.remove('hidden');
+        }
+
+        // 下一个单词
+        function nextWord() {
+            document.getElementById('resultPopup').classList.add('hidden');
+            document.getElementById('spellingInput').value = '';
+            document.getElementById('spellingInput').className = 'spelling-input';
+            
+            // 模拟进度更新
+            const progress = document.getElementById('progressFill');
+            const text = document.getElementById('progressText');
+            const currentProgress = parseInt(progress.style.width) + 10;
+            
+            if (currentProgress >= 100) {
+                showCompletionPopup();
+            } else {
+                progress.style.width = currentProgress + '%';
+                text.textContent = `${Math.floor(currentProgress/10)} / 10`;
+            }
+        }
+
+        // 测试功能
+        function toggleTestButtons() {
+            showTestButtons = !showTestButtons;
+            const testButtons = document.getElementById('testButtons');
+            
+            if (showTestButtons) {
+                testButtons.classList.remove('hidden');
+            } else {
+                testButtons.classList.add('hidden');
+            }
+        }
+
+        function testCorrectAnswer() {
+            console.log('测试正确答案');
+            const input = document.getElementById('spellingInput');
+            input.value = currentWord.word;
+            input.className = 'spelling-input correct';
+            
+            stats.correct++;
+            updateStats();
+            showResultPopup(true, currentWord.word, currentWord.word);
+        }
+
+        function testIncorrectAnswer() {
+            console.log('测试错误答案');
+            const input = document.getElementById('spellingInput');
+            const incorrectAnswer = currentWord.word.substring(0, currentWord.word.length - 1);
+            input.value = incorrectAnswer;
+            input.className = 'spelling-input incorrect';
+            
+            stats.incorrect++;
+            updateStats();
+            showResultPopup(false, currentWord.word, incorrectAnswer);
+        }
+
+        function testCompletion() {
+            console.log('测试完成弹窗');
+            showCompletionPopup();
+        }
+
+        // 显示完成弹窗
+        function showCompletionPopup() {
+            const popup = document.getElementById('completionPopup');
+            
+            // 更新统计数据
+            document.getElementById('correctCount').textContent = stats.correct || 8;
+            document.getElementById('incorrectCount').textContent = stats.incorrect || 2;
+            document.getElementById('accuracyRate').textContent = (stats.accuracy || 80) + '%';
+            document.getElementById('timeUsed').textContent = '3分钟';
+            
+            popup.classList.remove('hidden');
+        }
+
+        // 重新开始练习
+        function restartPractice() {
+            stats = { correct: 0, incorrect: 0, accuracy: 0 };
+            document.getElementById('completionPopup').classList.add('hidden');
+            document.getElementById('progressFill').style.width = '10%';
+            document.getElementById('progressText').textContent = '1 / 10';
+            document.getElementById('spellingInput').value = '';
+            document.getElementById('spellingInput').className = 'spelling-input';
+        }
+
+        // 返回首页
+        function backToHome() {
+            alert('返回首页');
+        }
+
+        // 点击遮罩层关闭弹窗
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('popup-overlay')) {
+                e.target.classList.add('hidden');
+            }
+        });
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('拼写练习页面已加载');
+            document.getElementById('spellingInput').focus();
+        });
+    </script>
+</body>
+</html>

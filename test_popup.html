@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>拼写练习弹窗测试</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+        }
+        
+        .test-container {
+            max-width: 375px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        
+        .test-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .test-buttons {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .test-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            background: #667eea;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .test-btn:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+        }
+        
+        .test-btn.success {
+            background: #10b981;
+        }
+        
+        .test-btn.error {
+            background: #ef4444;
+        }
+        
+        /* 模拟小程序弹窗样式 */
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(4px);
+        }
+        
+        .popup-overlay.show {
+            display: flex;
+        }
+        
+        .popup-content {
+            width: 320px;
+            max-width: 90vw;
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            transform: scale(0.9);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+        
+        .popup-overlay.show .popup-content {
+            transform: scale(1);
+            opacity: 1;
+        }
+        
+        .popup-close {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: rgba(0,0,0,0.1);
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: #666;
+        }
+        
+        .status-section {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .status-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            margin: 0 auto 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+        }
+        
+        .status-icon.correct {
+            background: linear-gradient(135deg, #10b981, #059669);
+        }
+        
+        .status-icon.incorrect {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+        }
+        
+        .status-text {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .status-text.correct {
+            color: #10b981;
+        }
+        
+        .status-text.incorrect {
+            color: #ef4444;
+        }
+        
+        .word-card {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        
+        .word-text {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 8px;
+        }
+        
+        .word-phonetic {
+            font-size: 16px;
+            color: #6b7280;
+            margin-bottom: 8px;
+        }
+        
+        .word-meaning {
+            font-size: 14px;
+            color: #374151;
+            line-height: 1.5;
+        }
+        
+        .answer-section {
+            margin-bottom: 16px;
+        }
+        
+        .answer-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 12px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .answer-correct {
+            background: #dcfce7;
+            color: #166534;
+        }
+        
+        .answer-incorrect {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .answer-label {
+            font-weight: 600;
+            margin-right: 8px;
+        }
+        
+        .error-analysis {
+            background: #fef3c7;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 16px;
+        }
+        
+        .error-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #92400e;
+            margin-bottom: 8px;
+        }
+        
+        .error-content {
+            font-size: 13px;
+            color: #a16207;
+            line-height: 1.4;
+        }
+        
+        .popup-actions {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .popup-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .popup-btn.primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .popup-btn.secondary {
+            background: #f3f4f6;
+            color: #374151;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: 12px;
+            background: #f8fafc;
+            border-radius: 8px;
+        }
+        
+        .stat-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 4px;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #6b7280;
+        }
+        
+        .achievements {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .achievement-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            color: white;
+            border-radius: 16px;
+            font-size: 12px;
+            font-weight: 600;
+            margin: 0 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <div class="test-header">
+            <h1>拼写练习弹窗测试</h1>
+            <p>点击按钮测试不同的弹窗效果</p>
+        </div>
+        
+        <div class="test-buttons">
+            <button class="test-btn success" onclick="showResultPopup(true)">显示正确答案弹窗</button>
+            <button class="test-btn error" onclick="showResultPopup(false)">显示错误答案弹窗</button>
+            <button class="test-btn" onclick="showCompletionPopup()">显示练习完成弹窗</button>
+        </div>
+    </div>
+    
+    <!-- 结果反馈弹窗 -->
+    <div id="resultPopup" class="popup-overlay">
+        <div class="popup-content" style="position: relative;">
+            <button class="popup-close" onclick="hidePopup('resultPopup')">&times;</button>
+            
+            <div class="status-section">
+                <div id="statusIcon" class="status-icon">✓</div>
+                <div id="statusText" class="status-text">回答正确！</div>
+                <div class="status-subtitle">太棒了，继续保持！</div>
+            </div>
+            
+            <div class="word-card">
+                <div class="word-text">apple</div>
+                <div class="word-phonetic">/ˈæpəl/</div>
+                <div class="word-meaning">n. 苹果；苹果树</div>
+            </div>
+            
+            <div class="answer-section">
+                <div id="correctAnswer" class="answer-item answer-correct">
+                    <span class="answer-label">正确答案:</span>
+                    <span>apple</span>
+                </div>
+                <div id="userAnswer" class="answer-item" style="display: none;">
+                    <span class="answer-label">你的答案:</span>
+                    <span>aple</span>
+                </div>
+            </div>
+            
+            <div id="errorAnalysis" class="error-analysis" style="display: none;">
+                <div class="error-title">💡 错误分析</div>
+                <div class="error-content">你漏写了一个字母 'p'，apple 是双写 p 的单词。</div>
+            </div>
+            
+            <div class="popup-actions">
+                <button class="popup-btn secondary">🔊 再听一遍</button>
+                <button class="popup-btn primary" onclick="hidePopup('resultPopup')">下一题</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 练习完成弹窗 -->
+    <div id="completionPopup" class="popup-overlay">
+        <div class="popup-content" style="position: relative;">
+            <button class="popup-close" onclick="hidePopup('completionPopup')">&times;</button>
+            
+            <div class="status-section">
+                <div class="status-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">🎉</div>
+                <div class="status-text" style="color: #8b5cf6;">练习完成！</div>
+                <div class="status-subtitle">恭喜你完成了本次拼写练习</div>
+            </div>
+            
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-value">8</div>
+                    <div class="stat-label">正确</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">2</div>
+                    <div class="stat-label">错误</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">80%</div>
+                    <div class="stat-label">准确率</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">3分钟</div>
+                    <div class="stat-label">用时</div>
+                </div>
+            </div>
+            
+            <div class="achievements">
+                <div class="achievement-badge">🏆 首次完成</div>
+                <div class="achievement-badge">⚡ 速度达人</div>
+            </div>
+            
+            <div class="popup-actions">
+                <button class="popup-btn secondary" onclick="hidePopup('completionPopup')">重新练习</button>
+                <button class="popup-btn primary" onclick="hidePopup('completionPopup')">返回首页</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function showResultPopup(isCorrect) {
+            const popup = document.getElementById('resultPopup');
+            const statusIcon = document.getElementById('statusIcon');
+            const statusText = document.getElementById('statusText');
+            const userAnswer = document.getElementById('userAnswer');
+            const errorAnalysis = document.getElementById('errorAnalysis');
+            
+            if (isCorrect) {
+                statusIcon.className = 'status-icon correct';
+                statusIcon.textContent = '✓';
+                statusText.className = 'status-text correct';
+                statusText.textContent = '回答正确！';
+                userAnswer.style.display = 'none';
+                errorAnalysis.style.display = 'none';
+            } else {
+                statusIcon.className = 'status-icon incorrect';
+                statusIcon.textContent = '✗';
+                statusText.className = 'status-text incorrect';
+                statusText.textContent = '回答错误';
+                userAnswer.style.display = 'flex';
+                userAnswer.className = 'answer-item answer-incorrect';
+                errorAnalysis.style.display = 'block';
+            }
+            
+            popup.classList.add('show');
+        }
+        
+        function showCompletionPopup() {
+            const popup = document.getElementById('completionPopup');
+            popup.classList.add('show');
+        }
+        
+        function hidePopup(popupId) {
+            const popup = document.getElementById(popupId);
+            popup.classList.remove('show');
+        }
+        
+        // 点击遮罩层关闭弹窗
+        document.querySelectorAll('.popup-overlay').forEach(overlay => {
+            overlay.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.classList.remove('show');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
